@@ -1,0 +1,59 @@
+*.user
+build/
+CMakeFiles
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Caffe binaries
+*.caffemodel
+*.binaryproto
+*.mdb
+*.solverstate
+
+# Products of Caffe training
+caffe.*
+caffeINFOtrain.txt
+caffeINFOval.txt
+test_acc_*.txt
+
+# Images
+*.png
+*.jpg
+
+# MAC stuff
+*.DS_store
+
+# python
+*.py[cod]
+.idea
