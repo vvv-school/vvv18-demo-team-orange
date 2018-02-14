@@ -86,9 +86,16 @@ public:
         // initial face expression
         yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
+
         face_expression_ini.addString("set");
         face_expression_ini.addString("all");
         face_expression_ini.addString("sur");
+        portKinematicsFaceExpression.write(face_expression_ini);
+        
+        face_expression_ini.clear();
+        face_expression_ini.addString("set");
+        face_expression_ini.addString("eli");
+        face_expression_ini.addString("hap");
         portKinematicsFaceExpression.write(face_expression_ini);
 
 
@@ -99,12 +106,19 @@ public:
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
         request_ld.addString("look_at");
-        request_ld.addDouble(40);
+        request_ld.addDouble(-30);
         rpcKinematicsHighFive.write(request_ld, response_ld);
         yInfo() << "look_down: finished \n";
 
 
         Time::delay(2.0);
+
+        // look down to table
+        yInfo() << "look_down: request";
+        request_ld.addString("look_at");
+        request_ld.addDouble(0);
+        rpcKinematicsHighFive.write(request_ld, response_ld);
+        yInfo() << "look_down: finished \n";
 
 
         // read input from vision
@@ -117,12 +131,12 @@ public:
 
         // check bounding boxes content with input
 
-
+        /*
         // point to
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_ld.addString("point_to");
-        request_ld.addDouble(-0.3);
+        request_ld.addDouble(-1.0);
         request_ld.addDouble(0.0);
         request_ld.addDouble(0.0);
         rpcKinematicsHighFive.write(request_pt, response_pt);
@@ -149,12 +163,11 @@ public:
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
-
+        */
 
         // react accordingly to feedback
         yarp::os::Bottle face_expression;
-        bool feedback = response_feed.get(0).asBool();
-        feedback = false;
+        bool feedback = true; //response_feed.get(0).asBool();
         if (feedback) {
             // be happy
             yInfo() << "I am happy :)! \n";
@@ -176,14 +189,14 @@ public:
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
 
-
+        /*
         // home position
         yInfo() << "home: request \n";
         yarp::os::Bottle request_hp, response_hp;
         request_hp.addString("home");
-        //rpcKinematicsHighFive.write(request_hp, response_hp);
+        rpcKinematicsHighFive.write(request_hp, response_hp);
         yInfo() << "home: finished \n";
-
+        */
         return true;
     }
 
@@ -222,14 +235,18 @@ int main(int argc, char * argv[])
     yInfo()<<"Configure module...";
     manager.configure(rf);
 
-    yarp.connect("/orange/kinematics_face_expression:o", "/emotion/in");
+    yarp.connect("/orange/kinematics_face_expression:o", "/icub/face/emotions/in");
 
     yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
     yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
 
-    yarp.connect("/face/eyelids", "/icubSim/face/eyelids");
-    yarp.connect("/face/image/out", "/icubSim/texture/face");
-    yarp.connect("/emotion/out", "/icubSim/face/raw/in");
+    //yarp.connect("/face/eyelids", "/icubSim/face/eyelids");
+    //yarp.connect("/face/image/out", "/icubSim/texture/face");
+    //yarp.connect("/emotion/out", "/icubSim/face/raw/in");
+
+    yarp.connect("/face/eyelids", "/icub/face/eyelids");
+    yarp.connect("/face/image/out", "/icub/texture/face");
+    yarp.connect("/emotion/out", "/icub/face/raw/in");
 
 
     yInfo()<<"Start module...";

@@ -27,6 +27,7 @@ protected:
     IGazeControl      *igaze;
 
     RpcServer rpcPort;
+    RpcClient rpcPortARE; //Port for Actions Rendering Engine
 
     Mutex mutex;
 
@@ -49,7 +50,6 @@ protected:
         bool ok = iarm->goToPoseSync(x, o);
         iarm->waitMotionDone();
         yInfo() << "Inside function";
-        //yInfo() << ok?"true":"false";
     }
 
     /***************************************************/
@@ -60,6 +60,20 @@ protected:
         //iarm->waitMotionDone();
     }
 
+    bool pointTo(const Vector &pointingPos)
+    {
+        Bottle cmdARE, replyARE;
+        cmdARE.addVocab(Vocab::encode("pfar"));
+        Bottle &tmpList=cmdARE.addList();
+        tmpList.addDouble(pointingPos[0]);
+        tmpList.addDouble(pointingPos[1]);
+        tmpList.addDouble(pointingPos[2]);
+        yInfo() << "command sent: " << cmdARE.toString().c_str();
+        rpcPortARE.write(cmdARE,replyARE);
+        yInfo() << "reply: " << replyARE.toString().c_str();
+        return (replyARE.get(0).asVocab()==Vocab::encode("ack"));
+    }
+
 public:
     /***************************************************/
 
@@ -67,8 +81,6 @@ public:
         if (!simulation)
             igaze->blockEyes(5.0);
 
-        //Vector point = zeros(3);
-        //point[1] = -40.0;
         igaze->lookAtAbsAngles(point);
         igaze->waitMotionDone();
     }
@@ -157,6 +169,9 @@ public:
         rpcPort.open("/orange/kinematics_high_five:i");
         attach(rpcPort);
 
+        rpcPortARE.open("/orange/kinematics_point_to:o");
+        Network::connect(rpcPortARE.getName().c_str(),"/actionsRenderingEngine/cmd:io");
+
         return true;
     }
 
@@ -211,11 +226,6 @@ public:
             pose[1] = 0.33;
             pose[2] = 0.37;
 
-            //Vector orie(4);
-            //orie[0] = 0.017;
-            //orie[1] = -0.94;
-            //orie[2] = 0.335;
-            //orie[3] = 1.35;
             // make sure hand is perpendicularly oriented
             Vector orie = computeHandOrientation();
 
@@ -227,19 +237,19 @@ public:
         }
         else if (cmd=="home")
         {
-            //-0.0247262931419455 0.330151552412954 0.373188508814116 
-            //0.016828116386148 -0.941893631916566 0.335489494103637 1.34803603197536
+            //-0.250936439277409 0.267227158396745 0.107466130790689 
+            //-0.00264973317420459 -0.820406257139274 0.571774913896048 2.77898401360798
 
             Vector pose(3);
-            pose[0] = 0.0;
-            pose[1] = 0.0;
-            pose[2] = 0.0;
+            pose[0] = -0.25;
+            pose[1] = 0.26;
+            pose[2] = 0.11;
 
             Vector orie(4);
             orie[0] = 0.0;
-            orie[1] = 0.0;
-            orie[2] = 0.0;
-            orie[3] = 0.0;
+            orie[1] = -0.82;
+            orie[2] = 0.57;
+            orie[3] = 2.78;
 
             highFive(pose, orie);
 
@@ -252,8 +262,19 @@ public:
             Vector point = zeros(3);
             point[1] = headPitch;
             lookAtPoint(point);
-        }else if(cmd=="point_to"){
-            //
+            reply.addString("ack");
+        }
+        else if(cmd=="point_to"){
+            Vector point;
+            point.resize(3);
+            //point[0] = -1.0;
+            //point[1] = 0.0;
+            //point[2] = 0.0;
+            point[0] = command.get(1).asDouble();
+            point[1] = command.get(2).asDouble();
+            point[2] = command.get(3).asDouble();
+            bool ret=pointTo(point);
+            reply.addString(ret?"ok":"ko");
         }
         else
             // the father class already handles the "quit" command
