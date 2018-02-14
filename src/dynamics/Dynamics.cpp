@@ -66,6 +66,9 @@ public:
 
         Network yarp;
 
+        handlerPort.open("/myModule");
+        attach(handlerPort);
+
         resetForces.open("/forcesReader");
         yarp.connect("/forcesReader","/wholeBodyDynamics/rpc:i");
 
