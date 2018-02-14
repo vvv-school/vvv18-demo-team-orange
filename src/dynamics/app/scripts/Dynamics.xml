@@ -1,0 +1,16 @@
+<application>
+
+  <name>Dynamics</name>
+
+  <dependencies>
+  </dependencies>
+
+  <module>
+      <name>Dynamics-robot</name>
+      <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+      <dependencies>
+      </dependencies>
+      <node>localhost</node>
+  </module>
+
+</application>
