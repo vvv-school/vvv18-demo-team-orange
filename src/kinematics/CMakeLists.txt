@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 # produce the cmake var PROJECT_NAME
-set(PROJECTNAME dynamics)
+set(PROJECTNAME kinematics)
 project(${PROJECTNAME})
 
 # mandatory use of these packages
@@ -23,9 +23,12 @@ include(ICUBcontribOptions)
 icubcontrib_set_default_prefix()
 
 include_directories(${YARP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-#add_executable(${PROJECT_NAME} main.cpp
-#                               helpers.h 
-#                               helpers.cpp)
+add_executable(${PROJECT_NAME} 
+#igaze.cpp
+							   ikine.cpp)
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+file(GLOB scripts ${CMAKE_SOURCE_DIR}/app/*.xml)
+yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
