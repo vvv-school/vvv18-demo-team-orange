@@ -22,8 +22,9 @@ using namespace yarp::math;
 class IKinematics: public RFModule 
 {
 protected:
-    PolyDriver drvArm;
+    PolyDriver drvArm, drvGaze;
     ICartesianControl *iarm;
+    IGazeControl      *igaze;
 
     RpcServer rpcPort;
 
@@ -61,6 +62,17 @@ protected:
 
 public:
     /***************************************************/
+
+    void lookAtPoint(Vector point){
+        if (!simulation)
+            igaze->blockEyes(5.0);
+
+        //Vector point = zeros(3);
+        //point[1] = -40.0;
+        igaze->lookAtAbsAngles(point);
+        igaze->waitMotionDone();
+    }
+
     bool configure(ResourceFinder &rf)
     {
         string robot=rf.check("robot",Value("icubSim")).asString();
@@ -90,6 +102,27 @@ public:
             Time::delay(1.0);
         }
 
+        Property optGaze;
+        optGaze.put("device","gazecontrollerclient");
+        optGaze.put("remote","/iKinGazeCtrl");
+        optGaze.put("local","/gaze_client");
+
+        // let's give the controller some time to warm up
+        ok=false;
+        t0=Time::now();
+        while (Time::now()-t0<10.0)
+        {
+            // this might fail if controller
+            // is not connected to solver yet
+            if (drvGaze.open(optGaze))
+            {
+                ok=true;
+                break;
+            }
+
+            Time::delay(1.0);
+        }
+
         if (!ok)
         {
             yError()<<"Unable to open the Cartesian Controller";
@@ -98,6 +131,8 @@ public:
 
         drvArm.view(iarm);
         iarm->setTrajTime(2.0);
+
+        drvGaze.view(igaze);
 
         // get the torso dofs
         Vector newDof, curDof;
@@ -211,6 +246,14 @@ public:
             // we assume the robot is not moving now
             reply.addString("ack");
             reply.addString("Yep! Home!");
+        }
+        else if (cmd=="look_at"){
+            double headPitch = command.get(1).asDouble();
+            Vector point = zeros(3);
+            point[1] = headPitch;
+            lookAtPoint(point);
+        }else if(cmd=="point_to"){
+            //
         }
         else
             // the father class already handles the "quit" command
