@@ -90,7 +90,18 @@ public:
         lookAt[1] = 0;
         lookAt[2] = 0;
         portKinematicsLookAt.writeStrict();
+
+        yInfo() << "look_down: request";
+        yarp::os::Bottle request_ld, response_ld;
+        request_ld.addString("look_at");
+        request_ld.addDouble(-0.15);
+        request_ld.addDouble(0.0);
+        request_ld.addDouble(0.0);
+        rpcKinematicsHighFive.write(request_ld, response_ld);
+        yInfo() << "look_down: finished";
         */
+
+
 
         // read input from vision
 
@@ -121,12 +132,14 @@ public:
         rpcKinematicsHighFive.write(request_hf, response_hf);
         yInfo() << "high-five: finished";
 
+
         // ask for feedback
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished";
+
 
         // react accordingly to feedback
         bool feedback = response_feed.get(0).asBool();
@@ -138,6 +151,15 @@ public:
             // be sad
             yInfo() << "I am sad :(!";
         }
+
+
+        // home position
+        yInfo() << "home: request";
+        yarp::os::Bottle request_hf, response_hf;
+        request_hf.addString("home");
+        rpcKinematicsHighFive.write(request_hf, response_hf);
+        yInfo() << "home: finished";
+
         return true;
     }
 
@@ -179,6 +201,8 @@ int main(int argc, char * argv[])
 
     yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
     yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
+
+    yarp.connect("")
 
 
     yInfo()<<"Start module...";
