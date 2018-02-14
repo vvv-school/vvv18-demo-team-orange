@@ -33,6 +33,8 @@ using namespace yarp::math;
 class Manager:public RFModule
 {
     double period;
+
+    yarp::os::Port portKinematicsFaceExpression;
     
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsLookAt;
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsPointTo;
@@ -62,7 +64,7 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
-        //rpcManager.open("orange/manager:rpc");
+        portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
 
         portKinematicsLookAt.open("/orange/kinematics_look_at:o");
         portKinematicsPointTo.open("/orange/kinematics_point_to:o");
@@ -80,6 +82,15 @@ public:
     {
         std::cout <<  "Manager: running happily..." << std::endl;
         yInfo() << "Manager: running happily...";
+
+        yarp::os::Bottle face_expression_ini;
+        face_expression_ini.addString("set");
+        face_expression_ini.addString("all");
+        face_expression_ini.addString("sur");
+        portKinematicsFaceExpression.write(face_expression_ini);
+
+        Time::delay(2.0);
+
 
 
         // look down to table
@@ -142,22 +153,34 @@ public:
 
 
         // react accordingly to feedback
+        yarp::os::Bottle face_expression;
         bool feedback = response_feed.get(0).asBool();
+        feedback = false;
         if (feedback) {
-            yInfo() << "I am happy :)!";
             // be happy
+            yInfo() << "I am happy :)!";
+            face_expression.addString("set");
+            face_expression.addString("all");
+            face_expression.addString("hap");
         }
         else {
             // be sad
             yInfo() << "I am sad :(!";
+            face_expression.addString("set");
+            face_expression.addString("all");
+            face_expression.addString("sad");
         }
+        portKinematicsFaceExpression.write(face_expression);
 
+        // end of cicle, wait before restarting...
+        yInfo() << "End of cicle, wait before restarting...";
+        Time::delay(5.0);
 
         // home position
         yInfo() << "home: request";
-        yarp::os::Bottle request_hf, response_hf;
-        request_hf.addString("home");
-        rpcKinematicsHighFive.write(request_hf, response_hf);
+        yarp::os::Bottle request_hp, response_hp;
+        request_hp.addString("home");
+        //rpcKinematicsHighFive.write(request_hp, response_hp);
         yInfo() << "home: finished";
 
         return true;
@@ -198,11 +221,14 @@ int main(int argc, char * argv[])
     yInfo()<<"Configure module...";
     manager.configure(rf);
 
+    yarp.connect("/orange/kinematics_face_expression:o", "/emotion/in");
 
     yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
     yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
 
-    yarp.connect("")
+    yarp.connect("/face/eyelids", "/icubSim/face/eyelids");
+    yarp.connect("/face/image/out", "/icubSim/texture/face");
+    yarp.connect("/emotion/out", "/icubSim/face/raw/in");
 
 
     yInfo()<<"Start module...";
