@@ -47,6 +47,13 @@ public:
         else{
             yInfo() << "I correctly opened /orange/vision/rpcclient";
         }
+        if (!controllerPort.open("/orange/vision/controller:o")){
+            yError() << "Error while opening /orange/vision/controller:o";
+            return false;
+        }
+        else{
+            yInfo() << "I correctly opened /orange/vision/controller:o";
+        }
     }
 
     /***************************************************/
@@ -54,6 +61,7 @@ public:
     {
         boxPort.interrupt();
         rpcPort.interrupt();
+        controllerPort.interrupt();
         return true;
     }
 
@@ -62,6 +70,7 @@ public:
     {
         boxPort.close();
         rpcPort.close();
+        controllerPort.close();
         return true;
     }
 
@@ -94,7 +103,6 @@ public:
         Matrix worldCoords(centers.rows(), 3);
         Bottle cmd;
         Bottle reply;
-        //for(int i=0 ; i < centers.size() ; i++){
         for(int i=0 ; i < centers.rows() ; i++){
             cmd.clear();
             reply.clear();
