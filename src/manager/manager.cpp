@@ -15,6 +15,7 @@
  */
 
 #include <iostream>
+#include <yarp/os/RpcClient.h>
 #include <yarp/os/RFModule.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/LogStream.h>
@@ -35,6 +36,9 @@ class Manager:public RFModule
     
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsLookAt;
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsPointTo;
+
+    yarp::os::RpcClient rpcKinematicsHighFive;
+    yarp::os::RpcClient rpcDynamicsFeedback;
 
 public:
 
@@ -58,8 +62,13 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
+        rpcManager.open("orange/manager:rpc");
+
         portKinematicsLookAt.open("/orange/kinematics_look_at:o");
         portKinematicsPointTo.open("/orange/kinematics_point_to:o");
+
+        rpcKinematicsHighFive.open("/orange/kinematcis_high_five:rpc");
+        rpcDynamicsFeedback.open("/orange/dynamic_feedback:rpc");
 
         return true;
     }
@@ -102,18 +111,26 @@ public:
         portKinematicsPointTo.writeStrict();
 
 
-        // high-five or low-five
+        // high-five
+        yarp::os::Bottle request_hf, response_hf;
+        request_hf.addString("Set a high-five");
+        rpcDynamicsFeedback.write(request_hf, response_hf);
 
 
-
-        // wait for feedback
-
-
-
-        // react 
+        // ask for feedback
+        yarp::os::Bottle request_feed, response_feed;
+        request_feed.addString("Give me feedback");
+        rpcDynamicsFeedback.write(request_feed, response_feed);
 
 
-
+        // react accordingly to feedback
+        bool feedback = response_feed.get(0).asBool();
+        if (feedback) {
+            // be happy
+        }
+        else {
+            // be sad
+        }
         return true;
     }
 
