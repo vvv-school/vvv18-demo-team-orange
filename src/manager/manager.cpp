@@ -65,10 +65,6 @@ public:
             period = rf.find("period").asDouble();
 
         portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
-
-        portKinematicsLookAt.open("/orange/kinematics_look_at:o");
-        portKinematicsPointTo.open("/orange/kinematics_point_to:o");
-
         rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
         rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
 
@@ -80,38 +76,35 @@ public:
     */
     bool updateModule()
     {
-        std::cout <<  "Manager: running happily..." << std::endl;
-        yInfo() << "Manager: running happily...";
+        // wait for user input
+        yInfo() << "input: wating...";
 
+
+        yInfo() << "input: got it!";
+
+
+        // initial face expression
+        yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
         face_expression_ini.addString("set");
         face_expression_ini.addString("all");
         face_expression_ini.addString("sur");
         portKinematicsFaceExpression.write(face_expression_ini);
 
+
         Time::delay(2.0);
 
 
-
         // look down to table
-        /*
-        yarp::sig::Vector &lookAt = portKinematicsLookAt.prepare();
-        lookAt = yarp::math::zeros(3);
-        lookAt[0] = -0.15;
-        lookAt[1] = 0;
-        lookAt[2] = 0;
-        portKinematicsLookAt.writeStrict();
-
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
         request_ld.addString("look_at");
-        request_ld.addDouble(-0.15);
-        request_ld.addDouble(0.0);
-        request_ld.addDouble(0.0);
+        request_ld.addDouble(40);
         rpcKinematicsHighFive.write(request_ld, response_ld);
-        yInfo() << "look_down: finished";
-        */
+        yInfo() << "look_down: finished \n";
 
+
+        Time::delay(2.0);
 
 
         // read input from vision
@@ -125,15 +118,18 @@ public:
         // check bounding boxes content with input
 
 
-        // point (kinematics)
-        /*
-        yarp::sig::Vector &pointTo = portKinematicsPointTo.prepare();
-        pointTo = yarp::math::zeros(3);
-        pointTo[0] = -0.3;
-        pointTo[1] = 0.2;
-        pointTo[2] = 0;
-        portKinematicsPointTo.writeStrict();
-        */
+        // point to
+        yInfo() << "point to: request";
+        yarp::os::Bottle request_pt, response_pt;
+        request_ld.addString("point_to");
+        request_ld.addDouble(-0.3);
+        request_ld.addDouble(0.0);
+        request_ld.addDouble(0.0);
+        rpcKinematicsHighFive.write(request_pt, response_pt);
+        yInfo() << "point to: finished \n";
+
+
+        Time::delay(2.0);
 
 
         // high-five
@@ -141,7 +137,10 @@ public:
         yarp::os::Bottle request_hf, response_hf;
         request_hf.addString("high_five");
         rpcKinematicsHighFive.write(request_hf, response_hf);
-        yInfo() << "high-five: finished";
+        yInfo() << "high-five: finished \n";
+
+
+        Time::delay(2.0);
 
 
         // ask for feedback
@@ -149,7 +148,7 @@ public:
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
-        yInfo() << "feedback: finished";
+        yInfo() << "feedback: finished \n";
 
 
         // react accordingly to feedback
@@ -158,30 +157,32 @@ public:
         feedback = false;
         if (feedback) {
             // be happy
-            yInfo() << "I am happy :)!";
+            yInfo() << "I am happy :)! \n";
             face_expression.addString("set");
             face_expression.addString("all");
             face_expression.addString("hap");
         }
         else {
             // be sad
-            yInfo() << "I am sad :(!";
+            yInfo() << "I am sad :(! \n";
             face_expression.addString("set");
             face_expression.addString("all");
             face_expression.addString("sad");
         }
         portKinematicsFaceExpression.write(face_expression);
 
+
         // end of cicle, wait before restarting...
-        yInfo() << "End of cicle, wait before restarting...";
+        yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
 
+
         // home position
-        yInfo() << "home: request";
+        yInfo() << "home: request \n";
         yarp::os::Bottle request_hp, response_hp;
         request_hp.addString("home");
         //rpcKinematicsHighFive.write(request_hp, response_hp);
-        yInfo() << "home: finished";
+        yInfo() << "home: finished \n";
 
         return true;
     }
