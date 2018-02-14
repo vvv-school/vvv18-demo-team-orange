@@ -1,0 +1,100 @@
+<application>
+
+  <name>vvv18 demo team orange vision</name>
+
+  <dependencies>
+      <port>/yarplogger</port>
+      <port>/icubSim/cam/left</port>
+      <port>/icubSim/cam/right</port>
+  </dependencies>
+
+  <module>
+      <name>vvv18_demo team_orange_vision</name>
+      <parameters>--robot icubSim</parameters>
+      <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+      <node>localhost</node>
+  </module>
+ <module>
+    <name>lbpExtract</name>
+</module>
+
+  <module>
+      <name>yarpview</name>
+      <parameters>--name /viewerL --x 10 --y 10 --compact</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>yarpview</name>
+      <parameters>--name /viewerR --x 360 --y 10 --compact</parameters>
+      <node>localhost</node>
+  </module>
+  
+  <module>
+    <name>yarpview</name>
+    <node>localhost</node>
+    <parameters>--name /view/lbp/input --x 0 --y 0 --p 33</parameters>
+</module>
+
+<module>
+    <name>yarpview</name>
+    <parameters>--name /view/lbp/output --x 330 --y 0 --p 33</parameters>
+    <node>localhost</node>
+</module>
+
+<module>
+    <name>yarpview</name>
+    <parameters>--name /view/lbp/blob --x 330 --y 40 --p 33</parameters>
+    <node>localhost</node>
+</module>
+
+  <connection>
+      <from>/icubSim/cam/left</from>
+      <to>/imgL:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/icubSim/cam/right</from>
+      <to>/imgR:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/imgL:o</from>
+      <to>/viewerL</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/imgR:o</from>
+      <to>/viewerR</to>
+      <protocol>udp</protocol>
+  </connection>
+  
+  <connection>
+    <from external="true">/icubSim/cam/left</from>
+    <to>/lbpExtract/image:i</to>
+    <protocol>udp</protocol>
+  </connection>
+    
+  <connection>
+        <from>/lbpExtract/propagated:o</from>
+        <to>/view/lbp/input</to>
+        <protocol>udp</protocol>
+  </connection>
+  
+  <connection>
+    <from>/lbpExtract/image:o</from>
+        <to>/view/lbp/output</to>
+        <protocol>udp</protocol>
+    </connection>
+    
+    <connection>
+        <from>/lbpExtract/segmentedlbp:o</from>
+        <to>/view/lbp/blob</to>
+        <protocol>udp</protocol>
+    </connection>
+
+
+</application>

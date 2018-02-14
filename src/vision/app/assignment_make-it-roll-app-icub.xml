@@ -1,0 +1,44 @@
+<application>
+
+  <name></name>
+
+  <dependencies>
+      <port>/yarplogger</port>
+      <port>/icub/cam/left</port>
+      <port>/icub/cam/right</port>
+      <port>/icub/cartesianController/right_arm/state:o</port>
+      <port>/iKinGazeCtrl/rpc</port>
+  </dependencies>
+
+  <module>
+      <name>assignment_make-it-roll</name>
+      <parameters>--robot icub</parameters>
+      <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+      <node>localhost</node>
+  </module>
+
+  <connection>
+    <from>/icub/cam/left</from>
+    <to>/imgL:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from>/icub/cam/right</from>
+    <to>/imgR:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from>/location</from>
+    <to>/memory/rpc</to>
+    <protocol>tcp</protocol>
+</connection>
+
+<connection>
+    <from>/calibration</from>
+    <to>/iolReachingCalibration/rpc</to>
+    <protocol>tcp</protocol>
+</connection>
+
+</application>
