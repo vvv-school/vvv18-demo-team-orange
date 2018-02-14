@@ -74,7 +74,7 @@ public:
             return false;
         }
 
-        portKinematicsLookAt.open("/orange/kinematics_look_at:o");
+        portKinematicsLookAt.open("/orange/kinematics_look_at:i");
 
         // open the view
         drvGaze.view(igaze);

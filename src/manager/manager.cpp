@@ -74,12 +74,14 @@ public:
 
 
         // look down to table
+        std::cout << "Trying to look down 2" << std::endl;
         yarp::sig::Vector &lookAt = portKinematicsLookAt.prepare();
         lookAt = yarp::math::zeros(3);
         lookAt[0] = -0.15;
         lookAt[1] = 0;
         lookAt[2] = 0;
         portKinematicsLookAt.writeStrict();
+        std::cout << "Trying to look down 2" << std::endl;
 
 
         // read input from vision
