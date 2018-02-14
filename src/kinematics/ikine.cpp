@@ -97,7 +97,7 @@ public:
         }
 
         drvArm.view(iarm);
-        iarm->setTrajTime(1.0);
+        iarm->setTrajTime(2.0);
 
         // get the torso dofs
         Vector newDof, curDof;
