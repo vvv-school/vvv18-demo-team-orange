@@ -15,6 +15,7 @@
  */
 
 #include <string>
+#include <iostream>
 
 #include <yarp/os/all.h>
 #include <yarp/dev/all.h>
@@ -31,9 +32,11 @@ using namespace yarp::math;
 /***************************************************/
 class GazeCtrl: public RFModule 
 {
+    Port rpcPort;
+
 protected:
     PolyDriver drvGaze;
-    IGazeControl      *igaze;
+    IGazeControl *igaze;
 
     bool simulation;
     
@@ -51,8 +54,11 @@ protected:
 
 public:
     /***************************************************/
-    bool configure(ResourceFinder &rf)
+    bool configure(yarp::os::ResourceFinder &rf)
     {
+        rpcPort.open("/service");
+        attach(rpcPort);
+
         string robot=rf.check("robot",Value("icubSim")).asString();
         simulation=(robot=="icubSim");
 
@@ -68,11 +74,16 @@ public:
             return false;
         }
 
-        portKinematicsLookAt.open("/orange/kinematics:o");
+        portKinematicsLookAt.open("/orange/kinematics_look_at:o");
 
         // open the view
         drvGaze.view(igaze);
 
+        return true;
+    }
+
+    bool respond(const Bottle &command, Bottle &reply)
+    {
         return true;
     }
 
@@ -91,16 +102,15 @@ public:
     }
 
     /***************************************************/
-    double getPeriod()
-    {
-        return 0.0;
-    }
-
-    /***************************************************/
     bool updateModule()
-    {
+    {   
         yarp::sig::Vector *look_at = portKinematicsLookAt.read();
+        //Vector look_at(3);
+        //look_at[0] = 0.15;
+        //look_at[1] = 0;
+        //look_at[2] = 0;
         fixGaze(*look_at);
+        std::cout << "Looking down" << std::endl;
         return true;
     }
 };
@@ -117,8 +127,9 @@ int main(int argc, char *argv[])
     }
 
     ResourceFinder rf;
-    rf.configure(argc,argv);
+    rf.configure(argc, argv);
 
     GazeCtrl mod;
     return mod.runModule(rf);
 }
+
