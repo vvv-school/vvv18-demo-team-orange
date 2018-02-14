@@ -62,13 +62,13 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
-        rpcManager.open("orange/manager:rpc");
+        //rpcManager.open("orange/manager:rpc");
 
         portKinematicsLookAt.open("/orange/kinematics_look_at:o");
         portKinematicsPointTo.open("/orange/kinematics_point_to:o");
 
-        rpcKinematicsHighFive.open("/orange/kinematcis_high_five:rpc");
-        rpcDynamicsFeedback.open("/orange/dynamic_feedback:rpc");
+        rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
+        rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
 
         return true;
     }
@@ -83,13 +83,14 @@ public:
 
 
         // look down to table
+        /*
         yarp::sig::Vector &lookAt = portKinematicsLookAt.prepare();
         lookAt = yarp::math::zeros(3);
         lookAt[0] = -0.15;
         lookAt[1] = 0;
         lookAt[2] = 0;
         portKinematicsLookAt.writeStrict();
-
+        */
 
         // read input from vision
 
@@ -103,33 +104,39 @@ public:
 
 
         // point (kinematics)
+        /*
         yarp::sig::Vector &pointTo = portKinematicsPointTo.prepare();
         pointTo = yarp::math::zeros(3);
         pointTo[0] = -0.3;
         pointTo[1] = 0.2;
         pointTo[2] = 0;
         portKinematicsPointTo.writeStrict();
+        */
 
 
         // high-five
+        yInfo() << "high-five: request";
         yarp::os::Bottle request_hf, response_hf;
-        request_hf.addString("Set a high-five");
-        rpcDynamicsFeedback.write(request_hf, response_hf);
-
+        request_hf.addString("high_five");
+        rpcKinematicsHighFive.write(request_hf, response_hf);
+        yInfo() << "high-five: finished";
 
         // ask for feedback
+        yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
-
+        yInfo() << "feedback: finished";
 
         // react accordingly to feedback
         bool feedback = response_feed.get(0).asBool();
         if (feedback) {
+            yInfo() << "I am happy :)!";
             // be happy
         }
         else {
             // be sad
+            yInfo() << "I am sad :(!";
         }
         return true;
     }
@@ -168,6 +175,12 @@ int main(int argc, char * argv[])
 
     yInfo()<<"Configure module...";
     manager.configure(rf);
+
+
+    yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
+    yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
+
+
     yInfo()<<"Start module...";
     manager.runModule();
 

@@ -66,7 +66,7 @@ public:
 
         Network yarp;
 
-        handlerPort.open("/myModule");
+        handlerPort.open("/orange/dynamics_feedback:i");
         attach(handlerPort);
 
         resetForces.open("/forcesReader");

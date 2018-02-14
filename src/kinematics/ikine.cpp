@@ -3,6 +3,7 @@
 // Author: Ugo Pattacini - <ugo.pattacini@iit.it>
 
 #include <string>
+#include <iostream>
 
 #include <yarp/os/all.h>
 #include <yarp/dev/all.h>
@@ -118,7 +119,7 @@ public:
         /*
         * PORTS CONFIGURATION
         */
-        rpcPort.open("/service");
+        rpcPort.open("/orange/kinematics_high_five:i");
         attach(rpcPort);
 
         return true;
@@ -163,6 +164,7 @@ public:
             reply.addVocab(Vocab::encode("many"));
             reply.addString("Available commands:");
             reply.addString("- high_five");
+            reply.addString("- home");
         }
         else if (cmd=="high_five")
         {
@@ -187,6 +189,28 @@ public:
             // we assume the robot is not moving now
             reply.addString("ack");
             reply.addString("Yep! Ready to rock!");
+        }
+        else if (cmd=="home")
+        {
+            //-0.0247262931419455 0.330151552412954 0.373188508814116 
+            //0.016828116386148 -0.941893631916566 0.335489494103637 1.34803603197536
+
+            Vector pose(3);
+            pose[0] = 0.0;
+            pose[1] = 0.0;
+            pose[2] = 0.0;
+
+            Vector orie(4);
+            orie[0] = 0.0;
+            orie[1] = 0.0;
+            orie[2] = 0.0;
+            orie[3] = 0.0;
+
+            highFive(pose, orie);
+
+            // we assume the robot is not moving now
+            reply.addString("ack");
+            reply.addString("Yep! Home!");
         }
         else
             // the father class already handles the "quit" command
