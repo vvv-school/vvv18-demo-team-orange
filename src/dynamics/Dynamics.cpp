@@ -37,8 +37,8 @@ class MyModule:public RFModule{
     BufferedPort<Vector> reader;
 
     double period = 0.5;
-    double threshold = 4.0;
-    double ratio = 0.8;
+    double threshold = 3.0;
+    double ratio = 0.5;
 
 public:
 
@@ -52,8 +52,12 @@ public:
                     yError() << "No contact...just noise";
                 }else if (result == 1){
                     yError() << "Positive";
+                    reply.addInt(1);
+                    break;
                 }else{
-                    yError() << "Positive";
+                    yError() << "Negative";
+                    reply.addInt(0);
+                    break;
                 }
             }else{
                 Time::yield();
@@ -89,7 +93,7 @@ public:
     }
 
     bool updateModule(){
-        yInfo( )<< "Running fine...";
+        //yInfo( )<< "Running fine...";
         return true;
     }
 
