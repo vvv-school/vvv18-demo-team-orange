@@ -7,7 +7,7 @@ layer {
   transform_param {
     mirror: false
     crop_size: 227
-    mean_file: "/path/to/train_mean.binaryproto"
+    mean_file: "/home/icub/final/vvv18-demo-team-orange/src/learning/app/conf/mean.binaryproto"
   }
   memory_data_param {
     batch_size: 1
@@ -213,7 +213,7 @@ layer {
   bottom: "fc7"
   top: "fc8N"
   inner_product_param {
-    num_output: FILLME
+    num_output: 4
   }
 }
 layer {

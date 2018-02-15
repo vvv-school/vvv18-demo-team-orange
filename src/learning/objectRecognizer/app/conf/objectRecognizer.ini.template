@@ -1,7 +1,0 @@
-prototxt_file /path/to/deploy_MemoryData_caffenet.prototxt
-label_file /path/to/labels.txt
-caffemodel_file /path/to/final.caffemodel
-blob_name prob
-
-compute_mode CPU
-device_id 0
