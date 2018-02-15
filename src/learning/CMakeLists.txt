@@ -21,7 +21,7 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
 # specify to install in $ICUBcontrib_DIR/bin
-icubcontrib_set_default_prefix()
+#icubcontrib_set_default_prefix()
 
 # verify Caffe version
 get_target_property(CAFFE_SONAME caffe IMPORTED_SONAME_RELEASE)
@@ -77,4 +77,4 @@ yarp_install(FILES ${conf} DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${PRO
 yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
 
 # generate ad-hoc project to perform "make uninstall"
-icubcontrib_add_uninstall_target()
+#icubcontrib_add_uninstall_target()

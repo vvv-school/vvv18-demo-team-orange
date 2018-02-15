@@ -1,0 +1,107 @@
+<application>
+<name>vvv18-orange</name>
+<module>
+       <name>yarplogger</name>
+       <parameters>--start</parameters>
+       <node>localhost</node>
+   </module>
+ 
+   <module>
+       <name>iCub_SIM</name>
+       <dependencies>
+           <port timeout="20">/yarplogger</port>
+       </dependencies>
+       <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+       <node>localhost</node>
+   </module>
+ 
+  <module>
+       <name>yarprobotinterface</name>
+       <parameters>--context simCartesianControl --config no_legs.xml</parameters>
+       <dependencies>
+           <port timeout="20">/yarplogger</port>
+           <port timeout="20">/icubSim/torso/state:o</port>
+           <port timeout="20">/icubSim/left_arm/state:o</port>
+           <port timeout="20">/icubSim/right_arm/state:o</port>
+       </dependencies>
+       <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+       <ensure>
+           <wait>2</wait>
+       </ensure>
+       <node>localhost</node>
+   </module>
+ 
+   <module>
+       <name>iKinCartesianSolver</name>
+       <parameters>--context simCartesianControl --part right_arm</parameters>
+       <dependencies>
+           <port timeout="20">/yarplogger</port>
+           <port timeout="20">/icubSim/torso/state:o</port>
+           <port timeout="20">/icubSim/right_arm/state:o</port>
+       </dependencies>
+       <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+       <node>localhost</node>
+       <ensure>
+           <wait>2</wait>
+       </ensure>
+   </module>
+ 
+   <module>
+       <name>iKinGazeCtrl</name>
+       <parameters>--from configSim.ini</parameters>
+       <dependencies>
+           <port timeout="20">/yarplogger</port>
+           <port timeout="20">/icubSim/torso/state:o</port>
+           <port timeout="20">/icubSim/head/state:o</port>
+           <port timeout="20">/icubSim/inertial</port>
+       </dependencies>
+       <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+       <ensure>
+           <wait>2</wait>
+       </ensure>
+       <node>localhost</node>
+   </module>
+
+
+
+
+
+
+
+
+        <connection>
+                <from>/orange/kinematics_face_expression:o</from>
+                <to>/icubSim/face/emotions/in</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/kinematics_high_five:o</from>
+                <to>/orange/kinematics_high_five:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/dynamics_feedback:o</from>
+                <to>/orange/dynamics_feedback:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/face/eyelids</from>
+                <to>/icubSim/face/eyelids</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/face/image/out</from>
+                <to>/icubSim/texture/face</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/emotion/out</from>
+                <to>/icubSim/face/raw/in</to>
+                <protocol>tcp</protocol>
+        </connection>
+</application>

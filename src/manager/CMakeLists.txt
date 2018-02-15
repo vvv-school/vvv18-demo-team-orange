@@ -26,4 +26,4 @@ include_directories(${YARP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR} manager.cpp)
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 
-#install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)

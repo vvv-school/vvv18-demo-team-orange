@@ -274,6 +274,7 @@ int main(int argc, char * argv[])
     yInfo()<<"Configure module...";
     manager.configure(rf);
 
+    /*
     yarp.connect("/orange/kinematics_face_expression:o", "/icub/face/emotions/in");
 
     yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
@@ -286,6 +287,7 @@ int main(int argc, char * argv[])
     yarp.connect("/face/eyelids", "/icub/face/eyelids");
     yarp.connect("/face/image/out", "/icub/texture/face");
     yarp.connect("/emotion/out", "/icub/face/raw/in");
+    */
 
 
     yInfo()<<"Start module...";

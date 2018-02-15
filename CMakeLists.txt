@@ -25,3 +25,6 @@ add_subdirectory(src)
 
 # generate ad-hoc project to perform "make uninstall"
 icubcontrib_add_uninstall_target()
+
+file(GLOB scripts ${CMAKE_SOURCE_DIR}/app/*.xml)
+yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
