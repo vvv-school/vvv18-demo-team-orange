@@ -63,15 +63,41 @@
    </module>
 
 
+<module>
+       <name>simFaceExpressions</name>
+       <parameters></parameters>
+       <node>localhost</node>
+   </module>
+   <module>
+       <name>emotionInterface</name>
+       <parameters></parameters>
+       <node>localhost</node>
+      </module>
 
 
-
+<module>
+       <name>lbpExtract</name>
+       <parameters></parameters>
+       <node>localhost</node>
+   </module>
+   <module>
+       <name>SFM</name>
+       <parameters>--robot icubSim</parameters>
+       <node>localhost</node>
+      </module>
 
 
 
         <connection>
+                <from>/orange/vision/controller:o</from>
+                <to>"/orange/vision/controller:i"</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
                 <from>/orange/kinematics_face_expression:o</from>
-                <to>/icubSim/face/emotions/in</to>
+                <!--to>/icubSim/face/emotions/in</to>-->
+                <to>/emotion/in</to>
                 <protocol>tcp</protocol>
         </connection>
 
@@ -86,6 +112,11 @@
                 <to>/orange/dynamics_feedback:i</to>
                 <protocol>tcp</protocol>
         </connection>
+
+
+
+
+
 
         <connection>
                 <from>/face/eyelids</from>
@@ -104,4 +135,57 @@
                 <to>/icubSim/face/raw/in</to>
                 <protocol>tcp</protocol>
         </connection>
+
+
+
+        <connection>
+                <from>/icubSim/cam/left</from>
+                <to>lbpExtract/image:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/lbpExtract/blobs:o</from>
+                <to>/orange/vision/box:i</to> 
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/icubSim/cam/left</from>
+                <to>/SFM/left:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/icubSim/cam/right</from>
+                <to>SFM/right:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/SFM/rpc</from>
+                <to>/orange/vision/rpcclient</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </application>

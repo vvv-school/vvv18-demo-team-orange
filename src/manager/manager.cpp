@@ -113,7 +113,7 @@ public:
         portKinematicsFaceExpression.write(face_expression_ini);
 
 
-        Time::delay(2.0);
+        Time::delay(5.0);
 
 
         /*
@@ -126,17 +126,21 @@ public:
         request_ld.addDouble(-30);
         rpcKinematicsHighFive.write(request_ld, response_ld);
         yInfo() << "look_down: finished \n";
-
+        
 
         /*
         * VISION and CLASSIFICATION
         */
         // read input from vision
+        yDebug() << "1";
         Bottle *output = portVision.read();
+        yDebug() << "2";
 
         yarp::sig::Matrix boxes, worldCoords;
+        yDebug() << "Boxes" << boxes.rows() << " " << boxes.cols();
         output->get(0).asList()->write(boxes);
         output->get(1).asList()->write(worldCoords);
+        yDebug() << "World" << worldCoords.rows() << " " << worldCoords.cols();
 
         // query content in bounding box
         std::vector<std::string> list_labels;
@@ -160,11 +164,12 @@ public:
                 desired_position = worldCoords.getRow(n);
             }
         }
-
+        
 
         /*
         * POINT TO OBJECT
         */
+        /*
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_ld.addString("point_to");
@@ -176,7 +181,7 @@ public:
 
         
         Time::delay(2.0);
-
+        */
 
         /*
         * HIGH FIVE
@@ -194,12 +199,13 @@ public:
         /*
         * ASK FOR FEEDBACK
         */
+        /*
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
-
+        */
 
         /*
         * REACT ACCORDING TO FEEDBACK
