@@ -140,7 +140,7 @@
 
         <connection>
                 <from>/icubSim/cam/left</from>
-                <to>lbpExtract/image:i</to>
+                <to>/lbpExtract/image:i</to>
                 <protocol>tcp</protocol>
         </connection>
 
@@ -158,7 +158,7 @@
 
         <connection>
                 <from>/icubSim/cam/right</from>
-                <to>SFM/right:i</to>
+                <to>/SFM/right:i</to>
                 <protocol>tcp</protocol>
         </connection>
 
