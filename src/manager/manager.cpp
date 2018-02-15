@@ -34,6 +34,7 @@ class Manager:public RFModule
 {
     double period;
 
+    yarp::os::Port portSpeechInput;
     yarp::os::Port portKinematicsFaceExpression;
 
     yarp::os::BufferedPort<yarp::os::Bottle> portVision;
@@ -71,6 +72,7 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
+        portSpeechInput.open("/orange/speech:i");
         portVision.open("/orange/vision/controller:i");
         portClassifierROI.open("/orange/portClassifierROI:o");
         portClassifierLabel.open("/orange/portClassifierLabel:i");
@@ -91,10 +93,38 @@ public:
     bool updateModule()
     {
         // USER INPUT 
-        std::string desired_object = "mug";
+        std::string desired_object = "";
         yInfo() << "input: wating...";
 
+        yarp::os::Bottle user_input;
+        std::string user_cmd; // = user_input->get(0).asString();
+        if (!portSpeechInput.read(user_input)) {
+            return true;
+        }
+        else {
+            user_cmd = user_input.get(0).asString();
+        }
 
+        yInfo() << "input: " << user_cmd;
+
+        if (user_cmd == "home") {
+            // HOME POSITION
+            yInfo() << "home: request \n";
+            yarp::os::Bottle request_hp, response_hp;
+            request_hp.addString("home");
+            rpcKinematicsHighFive.write(request_hp, response_hp);
+            yInfo() << "home: finished \n";
+        }
+        else if (user_cmd == "quit") {
+
+        }
+        else if (user_cmd == "where") {
+            desired_object = user_input.get(1).asString();
+        }
+        else {
+            yWarning() << "Command not valid!";
+            return true;
+        }
         yInfo() << "input: got it!";
 
         /*
@@ -301,13 +331,6 @@ public:
         // end of cicle, wait before restarting...
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
-
-        // HOME POSITION
-        yInfo() << "home: request \n";
-        yarp::os::Bottle request_hp, response_hp;
-        request_hp.addString("home");
-        rpcKinematicsHighFive.write(request_hp, response_hp);
-        yInfo() << "home: finished \n";
         */
         return true;
     }

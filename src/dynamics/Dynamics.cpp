@@ -37,7 +37,7 @@ class MyModule:public RFModule{
     BufferedPort<Vector> reader;
 
     double period = 0.5;
-    double threshold = 3.0;
+    double threshold = 2.0;
     double ratio = 0.5;
 
 public:

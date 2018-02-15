@@ -23,6 +23,15 @@
        <node>icub21</node>
    </module>
 
+    <module>
+        <name>speech.lua</name>
+        <deployer>lua</deployer>
+        <node>icub21</node>
+        <dependencies>
+        <port timeout="10">/speechRecognizer/rpc</port>
+        </dependencies>
+    </module>
+
    <module>
        <name>dynamics</name>
        <parameters></parameters>
@@ -48,9 +57,19 @@
    </module>
 
 
+
+
+
+
+        <connection>
+                <from>/orange/speech:o</from>
+                <to>/orange/speech:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
         <connection>
                 <from>/orange/vision/controller:o</from>
-                <to>"/orange/vision/controller:i"</to>
+                <to>"/orange/vision/controller:i</to>
                 <protocol>tcp</protocol>
         </connection>
 
@@ -67,8 +86,14 @@
         </connection>
 
         <connection>
-                <from>/orange/dynamics_feedback:o</from>
+                <from>/orange/kinematics_point_to:o</from>
                 <to>/orange/dynamics_feedback:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/dynamics_feedback:o</from>
+                <to>/actionsRenderingEngine/cmd:io</to>
                 <protocol>tcp</protocol>
         </connection>
 
