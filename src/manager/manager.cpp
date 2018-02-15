@@ -47,6 +47,8 @@ class Manager:public RFModule
 
     yarp::os::RpcClient rpcKinematicsHighFive;
     yarp::os::RpcClient rpcDynamicsFeedback;
+
+    yarp::os::RpcClient classifierRpc;
     
     //yarp::os::BufferedPort<yarp::os::Bottle> exitStatusBottle;
 
@@ -80,6 +82,7 @@ public:
         portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
         rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
         rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
+        classifierRpc.open("/orange/classifier:rpc");
         
         //exitStatusPort.open("orange/manager:o");
 
@@ -93,7 +96,7 @@ public:
     bool updateModule()
     {
         // USER INPUT 
-        std::string desired_object = "";
+        std::string desired_object = "mug";
         yInfo() << "input: wating...";
         /*
         yarp::os::Bottle user_input;
@@ -189,14 +192,17 @@ public:
             box(2) = input_boxes->get(i * 4 + 2).asInt();
             box(3) = input_boxes->get(i * 4 + 3).asInt();
             output.addList().read(box);
-            portClassifierROI.write();
+            //portClassifierROI.write();
 
-            /*
-            yInfo() << "Classifier...";
-            Bottle *input = portClassifierLabel.read();
-            list_labels[i] = input->get(0).asString();
-            yInfo() << "Done!";
-            */
+
+            Bottle command, reply;
+            command.addInt(box(0));
+            command.addInt(box(1));
+            command.addInt(box(2));
+            command.addInt(box(3));
+            classifierRpc.write(command, reply);
+
+            list_labels[i] = reply.get(0).asString();
         }       
 
         yInfo() << "Comparing labels...";
@@ -223,9 +229,9 @@ public:
             }
         }
 
-        desired_position(0) = input_coord->get(0).asDouble();
-        desired_position(1) = input_coord->get(1).asDouble();
-        desired_position(2) = input_coord->get(2).asDouble();
+        //desired_position(0) = input_coord->get(0).asDouble();
+        //desired_position(1) = input_coord->get(1).asDouble();
+        //desired_position(2) = input_coord->get(2).asDouble();
         
         
         // POINT TO OBJECT
@@ -233,7 +239,7 @@ public:
         yarp::os::Bottle request_pt, response_pt;
         request_pt.addString("point_to");
 
-        bool simulate_object = false
+        bool simulate_object = false;
         if (simulate_object) {
             request_pt.addDouble(-1.0);
             request_pt.addDouble(0.0);
