@@ -1,5 +1,5 @@
 <application>
-<name>vvv18-orange</name>
+<name>vvv18-orange-icub</name>
 <module>
        <name>lbpExtract</name>
        <parameters></parameters>
@@ -23,6 +23,29 @@
        <node>icub21</node>
    </module>
 
+   <module>
+       <name>dynamics</name>
+       <parameters></parameters>
+       <node>icub21</node>
+   </module>
+
+    <module>
+       <name>kinematics</name>
+       <parameters>--robot icub</parameters>
+       <node>icub21</node>
+   </module>
+
+   <module>
+       <name>vision</name>
+       <parameters></parameters>
+       <node>icub21</node>
+   </module>
+
+   <module>
+       <name>manager</name>
+       <parameters></parameters>
+       <node>icub21</node>
+   </module>
 
 
         <connection>
