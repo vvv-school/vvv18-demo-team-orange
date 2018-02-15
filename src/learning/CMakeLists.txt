@@ -21,7 +21,7 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
 # specify to install in $ICUBcontrib_DIR/bin
-#icubcontrib_set_default_prefix()
+icubcontrib_set_default_prefix()
 
 # verify Caffe version
 get_target_property(CAFFE_SONAME caffe IMPORTED_SONAME_RELEASE)

@@ -34,6 +34,7 @@ class Manager:public RFModule
 {
     double period;
 
+    yarp::os::Port portSpeechInput;
     yarp::os::Port portKinematicsFaceExpression;
 
     yarp::os::BufferedPort<yarp::os::Bottle> portVision;
@@ -46,6 +47,8 @@ class Manager:public RFModule
 
     yarp::os::RpcClient rpcKinematicsHighFive;
     yarp::os::RpcClient rpcDynamicsFeedback;
+    
+    //yarp::os::BufferedPort<yarp::os::Bottle> exitStatusBottle;
 
 public:
 
@@ -69,6 +72,7 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
+        portSpeechInput.open("/orange/speech:i");
         portVision.open("/orange/vision/controller:i");
         portClassifierROI.open("/orange/portClassifierROI:o");
         portClassifierLabel.open("/orange/portClassifierLabel:i");
@@ -76,6 +80,8 @@ public:
         portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
         rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
         rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
+        
+        //exitStatusPort.open("orange/manager:o");
 
         return true;
     }
@@ -83,21 +89,46 @@ public:
     /*
     * Main function, called periodically every getPeriod() seconds.
     */
+
     bool updateModule()
     {
-        /*
-        * USER INPUT
-        */ 
-        std::string desired_object = "mug";
+        // USER INPUT 
+        std::string desired_object = "";
         yInfo() << "input: wating...";
 
+        yarp::os::Bottle user_input;
+        std::string user_cmd; // = user_input->get(0).asString();
+        if (!portSpeechInput.read(user_input)) {
+            return true;
+        }
+        else {
+            user_cmd = user_input.get(0).asString();
+        }
 
+        yInfo() << "input: " << user_cmd;
+
+        if (user_cmd == "home") {
+            // HOME POSITION
+            yInfo() << "home: request \n";
+            yarp::os::Bottle request_hp, response_hp;
+            request_hp.addString("home");
+            rpcKinematicsHighFive.write(request_hp, response_hp);
+            yInfo() << "home: finished \n";
+        }
+        else if (user_cmd == "quit") {
+
+        }
+        else if (user_cmd == "where") {
+            desired_object = user_input.get(1).asString();
+        }
+        else {
+            yWarning() << "Command not valid!";
+            return true;
+        }
         yInfo() << "input: got it!";
 
-
         /*
-        * INITIAL FACE EXPRESSION
-        */
+        // INITIAL FACE EXPRESSION
         yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
 
@@ -116,9 +147,7 @@ public:
         Time::delay(5.0);
 
 
-        /*
-        * LOOK DOWN
-        */
+        // LOOK DOWN
         // look down to table
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
@@ -126,51 +155,72 @@ public:
         request_ld.addDouble(-30);
         rpcKinematicsHighFive.write(request_ld, response_ld);
         yInfo() << "look_down: finished \n";
-        
-
-        /*
-        * VISION and CLASSIFICATION
         */
-/*
+
+        //VISION and CLASSIFICATION
+
         // read input from vision
-        yDebug() << "1";
+        yInfo() << "Reading...";
         Bottle *output = portVision.read();
-        yDebug() << "2";
+        yInfo() << "Done!";
 
-        yarp::sig::Matrix boxes, worldCoords;
-        yDebug() << "Boxes" << boxes.rows() << " " << boxes.cols();
-        output->get(0).asList()->write(boxes);
-        output->get(1).asList()->write(worldCoords);
-        yDebug() << "World" << worldCoords.rows() << " " << worldCoords.cols();
+        yarp::os::Bottle *input_boxes = output->get(0).asList()->get(2).asList();//->write(boxes);
+        int list_size = input_boxes->size();
+        
+        // TODO
+        // Verifies that at least one object has been detected
+        //if(list_size < 1){
+        //    Bottle& exitStatus = exitStatusPort.prepare();
+        //    bool status = false;
+        //    output.addInt(status);
+        //    exitStatusPort.write();
+        //    yError() << "No objects detected!";
+        //    return;
+        //}
 
-        // query content in bounding box
-        std::vector<std::string> list_labels;
-        for (int i = 0; i < boxes.rows(); i++) {
-            // send ROI to classifier
+        std::vector<std::string> list_labels(list_size);
+        for (int i = 0; i < list_size / 4; i++) {
             Bottle& output = portClassifierROI.prepare();
-            Vector box = boxes.getRow(i);
+            Vector box;
+            box(0) = input_boxes->get(i * 4).asInt();
+            box(1) = input_boxes->get(i * 4 + 1).asInt();
+            box(2) = input_boxes->get(i * 4 + 2).asInt();
+            box(3) = input_boxes->get(i * 4 + 3).asInt();
             output.addList().read(box);
             portClassifierROI.write();
 
-            // get label from classifier
+            yInfo() << "Classifier...";
             Bottle *input = portClassifierLabel.read();
-            list_labels.push_back(input->get(0).asString());
-        }
+            list_labels[i] = input->get(0).asString();
+            yInfo() << "Done!";
+        }       
 
         // process labels and get desired position
-        Vector desired_position;
+        yarp::os::Bottle *input_coord = output->get(1).asList()->get(2).asList();
+        list_size = input_coord->size();
+        Vector desired_position(3);
         for (unsigned n = 0; n < list_labels.size(); ++n) {
             //cout << list_labels.at( n ) << " ";
             if (desired_object == list_labels.at(n)) {
-                desired_position = worldCoords.getRow(n);
+                desired_position(0) = input_coord->get(n * 3).asDouble();
+                desired_position(1) = input_coord->get(n * 3 + 1).asDouble();
+                desired_position(2) = input_coord->get(n * 3 + 2).asDouble();
+                // TODO
+                // Checks that the observed position is in a reacheable place
+                //if(desired_position(0) > abs(0.7) || desired_position(1) > abs(0.7) || desired_position(3) > abs(0.7)){
+                //    Bottle& exitStatus = exitStatusPort.prepare();
+                //    bool status = false;
+                //    output.addInt(status);
+                //    exitStatusPort.write();
+                //    yError() << "One of the world coordinates was out of range";
+                //    return;
+                //}  
             }
         }
         
-*/
-        /*
-        * POINT TO OBJECT
-        */
         
+        /*
+        // POINT TO OBJECT
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_pt.addString("point_to");
@@ -187,9 +237,7 @@ public:
         Time::delay(2.0);
         
 
-        /*
-        * HIGH FIVE
-        */
+        // HIGH FIVE
         yInfo() << "high-five: request";
         yarp::os::Bottle request_hf, response_hf;
         request_hf.addString("high_five");
@@ -200,18 +248,14 @@ public:
         Time::delay(2.0);
 
 
-        /*
-        * ASK FOR FEEDBACK
-        */
+        // ASK FOR FEEDBACK
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
 
-        /*
-        * REACT ACCORDING TO FEEDBACK
-        */
+        // REACT ACCORDING TO FEEDBACK
         yarp::os::Bottle face_expression;
         bool feedback = response_feed.get(0).asBool();
         if (feedback) {
@@ -234,16 +278,7 @@ public:
         // end of cicle, wait before restarting...
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
-
-        /*
-        * HOME POSITION
         */
-        yInfo() << "home: request \n";
-        yarp::os::Bottle request_hp, response_hp;
-        request_hp.addString("home");
-        rpcKinematicsHighFive.write(request_hp, response_hp);
-        yInfo() << "home: finished \n";
-
         return true;
     }
 
@@ -255,6 +290,7 @@ public:
         yInfo() << "Interrupting your module, for port cleanup";
         portKinematicsLookAt.interrupt();
         portKinematicsPointTo.interrupt();
+        //exitStatusPort.interrupt();
         return true;
     }
 
@@ -266,6 +302,7 @@ public:
         yInfo() << "Calling close function";
         portKinematicsLookAt.close();
         portKinematicsPointTo.close();
+        //exitStatusPort.close();
         return true;
     }
 };
@@ -277,26 +314,9 @@ int main(int argc, char * argv[])
     Manager manager;
     yarp::os::ResourceFinder rf;
     rf.configure(argc, argv);
-    // rf.setVerbose(true);
 
     yInfo()<<"Configure module...";
     manager.configure(rf);
-
-    /*
-    yarp.connect("/orange/kinematics_face_expression:o", "/icub/face/emotions/in");
-
-    yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
-    yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
-
-    //yarp.connect("/face/eyelids", "/icubSim/face/eyelids");
-    //yarp.connect("/face/image/out", "/icubSim/texture/face");
-    //yarp.connect("/emotion/out", "/icubSim/face/raw/in");
-
-    yarp.connect("/face/eyelids", "/icub/face/eyelids");
-    yarp.connect("/face/image/out", "/icub/texture/face");
-    yarp.connect("/emotion/out", "/icub/face/raw/in");
-    */
-
 
     yInfo()<<"Start module...";
     manager.runModule();

@@ -52,13 +52,6 @@ protected:
     }
 
     /***************************************************/
-    void home()
-    {
-        // FILL IN THE CODE
-        //iarm->goToPoseSync(init_x, init_o);
-        //iarm->waitMotionDone();
-    }
-
     bool pointTo(const Vector &pointingPos)
     {
         Bottle cmdARE, replyARE;
@@ -81,7 +74,7 @@ public:
             igaze->blockEyes(5.0);
 
         igaze->lookAtAbsAngles(point);
-        igaze->waitMotionDone();
+        igaze->waitMotionDone(0.1, 3.0);
     }
 
     bool configure(ResourceFinder &rf)
@@ -169,7 +162,7 @@ public:
         attach(rpcPort);
 
         rpcPortARE.open("/orange/kinematics_point_to:o");
-        Network::connect(rpcPortARE.getName().c_str(),"/actionsRenderingEngine/cmd:io");
+        //Network::connect(rpcPortARE.getName().c_str(),"/actionsRenderingEngine/cmd:io");
 
         return true;
     }
