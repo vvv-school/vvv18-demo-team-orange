@@ -64,7 +64,7 @@
         <connection>
                 <from>/lbpExtract/blobs:o</from>
                 <to>/orange/vision/box:i</to> 
-                <protocol>tcp</protocol>
+                <protocol>tcp</protocol> 
         </connection>
 
         <connection>

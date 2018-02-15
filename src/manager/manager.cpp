@@ -83,21 +83,18 @@ public:
     /*
     * Main function, called periodically every getPeriod() seconds.
     */
+
     bool updateModule()
     {
-        /*
-        * USER INPUT
-        */ 
+        // USER INPUT 
         std::string desired_object = "mug";
         yInfo() << "input: wating...";
 
 
         yInfo() << "input: got it!";
 
-
         /*
-        * INITIAL FACE EXPRESSION
-        */
+        // INITIAL FACE EXPRESSION
         yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
 
@@ -116,9 +113,7 @@ public:
         Time::delay(5.0);
 
 
-        /*
-        * LOOK DOWN
-        */
+        // LOOK DOWN
         // look down to table
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
@@ -126,27 +121,81 @@ public:
         request_ld.addDouble(-30);
         rpcKinematicsHighFive.write(request_ld, response_ld);
         yInfo() << "look_down: finished \n";
-        
-
-        /*
-        * VISION and CLASSIFICATION
         */
-/*
+
+        //VISION and CLASSIFICATION
+
         // read input from vision
-        yDebug() << "1";
+        yInfo() << "Reading...";
         Bottle *output = portVision.read();
-        yDebug() << "2";
+        yInfo() << "Done!";
 
-        yarp::sig::Matrix boxes, worldCoords;
-        yDebug() << "Boxes" << boxes.rows() << " " << boxes.cols();
-        output->get(0).asList()->write(boxes);
-        output->get(1).asList()->write(worldCoords);
-        yDebug() << "World" << worldCoords.rows() << " " << worldCoords.cols();
+        yarp::os::Bottle *input_boxes = output->get(0).asList()->get(2).asList();//->write(boxes);
+        int list_size = input_boxes->size();
 
+        //yarp::sig::Matrix boxes(list_size / 4, 4);
+        //std::vector<std::string> list_labels;
+        std::vector<std::string> list_labels(list_size);
+        for (int i = 0; i < list_size / 4; i++) {
+            //boxes[i][0] = input_boxes->get(i * 4).asInt();
+            //boxes[i][1] = input_boxes->get(i * 4 + 1).asInt();
+            //boxes[i][2] = input_boxes->get(i * 4 + 2).asInt();
+            //boxes[i][3] = input_boxes->get(i * 4 + 3).asInt();
+
+            Bottle& output = portClassifierROI.prepare();
+            Vector box;
+            box(0) = input_boxes->get(i * 4).asInt();
+            box(1) = input_boxes->get(i * 4 + 1).asInt();
+            box(2) = input_boxes->get(i * 4 + 2).asInt();
+            box(3) = input_boxes->get(i * 4 + 3).asInt();
+            output.addList().read(box);
+            portClassifierROI.write();
+
+            yInfo() << "Classifier...";
+            Bottle *input = portClassifierLabel.read();
+            list_labels[i] = input->get(0).asString();
+            yInfo() << "Done!";
+        }       
+        //yDebug() << "Boxes" << boxes.rows() << " " << boxes.cols();
+        //yDebug() << boxes.toString();
+
+
+        yarp::os::Bottle *input_coord = output->get(1).asList()->get(2).asList();//->write(boxes);
+        list_size = input_coord->size();
+
+        // process labels and get desired position
+        Vector desired_position(3);
+        for (unsigned n = 0; n < list_labels.size(); ++n) {
+            //cout << list_labels.at( n ) << " ";
+            if (desired_object == list_labels.at(n)) {
+                desired_position(0) = input_coord->get(n * 3).asDouble();
+                desired_position(1) = input_coord->get(n * 3 + 1).asDouble();
+                desired_position(2) = input_coord->get(n * 3 + 2).asDouble();
+            }
+        }
+
+
+
+
+
+/*
+        yarp::sig::Matrix worldCoords(list_size / 3, 3);
+        for (int i = 0; i < list_size / 3; i++) {
+            worldCoords[i][0] = input_coord->get(i * 3).asDouble();
+            worldCoords[i][1] = input_coord->get(i * 3 + 1).asDouble();
+            worldCoords[i][2] = input_coord->get(i * 3 + 2).asDouble();
+        }  
+*/     
+        //yDebug() << "World" << worldCoords.rows() << " " << worldCoords.cols();
+        //yDebug() << worldCoords.toString();
+
+ 
+        /*
         // query content in bounding box
         std::vector<std::string> list_labels;
         for (int i = 0; i < boxes.rows(); i++) {
             // send ROI to classifier
+            yInfo() << "quering to classifier";
             Bottle& output = portClassifierROI.prepare();
             Vector box = boxes.getRow(i);
             output.addList().read(box);
@@ -165,12 +214,11 @@ public:
                 desired_position = worldCoords.getRow(n);
             }
         }
-        
 */
-        /*
-        * POINT TO OBJECT
-        */
         
+        
+        /*
+        // POINT TO OBJECT
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_pt.addString("point_to");
@@ -187,9 +235,7 @@ public:
         Time::delay(2.0);
         
 
-        /*
-        * HIGH FIVE
-        */
+        // HIGH FIVE
         yInfo() << "high-five: request";
         yarp::os::Bottle request_hf, response_hf;
         request_hf.addString("high_five");
@@ -200,18 +246,14 @@ public:
         Time::delay(2.0);
 
 
-        /*
-        * ASK FOR FEEDBACK
-        */
+        // ASK FOR FEEDBACK
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
 
-        /*
-        * REACT ACCORDING TO FEEDBACK
-        */
+        // REACT ACCORDING TO FEEDBACK
         yarp::os::Bottle face_expression;
         bool feedback = response_feed.get(0).asBool();
         if (feedback) {
@@ -235,15 +277,13 @@ public:
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
 
-        /*
-        * HOME POSITION
-        */
+        // HOME POSITION
         yInfo() << "home: request \n";
         yarp::os::Bottle request_hp, response_hp;
         request_hp.addString("home");
         rpcKinematicsHighFive.write(request_hp, response_hp);
         yInfo() << "home: finished \n";
-
+        */
         return true;
     }
 
@@ -277,26 +317,9 @@ int main(int argc, char * argv[])
     Manager manager;
     yarp::os::ResourceFinder rf;
     rf.configure(argc, argv);
-    // rf.setVerbose(true);
 
     yInfo()<<"Configure module...";
     manager.configure(rf);
-
-    /*
-    yarp.connect("/orange/kinematics_face_expression:o", "/icub/face/emotions/in");
-
-    yarp.connect("/orange/kinematics_high_five:o", "/orange/kinematics_high_five:i");
-    yarp.connect("/orange/dynamics_feedback:o", "/orange/dynamics_feedback:i");
-
-    //yarp.connect("/face/eyelids", "/icubSim/face/eyelids");
-    //yarp.connect("/face/image/out", "/icubSim/texture/face");
-    //yarp.connect("/emotion/out", "/icubSim/face/raw/in");
-
-    yarp.connect("/face/eyelids", "/icub/face/eyelids");
-    yarp.connect("/face/image/out", "/icub/texture/face");
-    yarp.connect("/emotion/out", "/icub/face/raw/in");
-    */
-
 
     yInfo()<<"Start module...";
     manager.runModule();
