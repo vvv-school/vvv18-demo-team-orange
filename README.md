@@ -11,7 +11,7 @@ Ciao a tutti and welcome to the official documentation of the **VVV18 Orange Tea
 
 Let's start with a brief overview of the problem itself and then move on how we decided to tackle it.
 
-# Table of Contents  
+## Table of Contents  
 - [Overview](#overview)  
 - [Input (speech commands)](#input)
 - [Vision](#vision) 
