@@ -94,7 +94,7 @@ to read forces and wrenches perceived by the sensor and projected to the end-eff
 to open a yarp scope and link it to the sensor readings, in order to understand the direction of the applied forces and to tune the threshold to detect the contact.
 
 
-#### Dependencies
+## Dependencies
 - [robotology/segmentation](https://github.com/robotology/segmentation)
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
