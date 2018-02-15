@@ -84,8 +84,11 @@ public:
     bool updateModule()
     {
         // Get data from the LBP module (bounding boxes and center of objects)
+        yInfo() << "ei1";
         Bottle* boxBot = boxPort.read();
+        yInfo() << "ei2";
 
+        /*
         Matrix boxes(boxBot->size(), 4);    // Bounding boxes
         Matrix centers(boxBot->size(), 2);  // Center points of the bounding boxes
         for(int i=0; i<boxBot->size(); i++){
@@ -115,12 +118,16 @@ public:
             worldCoords[i][1] = reply.get(1).asDouble();
             worldCoords[i][2] = reply.get(2).asDouble();
         }
+        
 
         // Pass back data to controller
         Bottle& output = controllerPort.prepare();
         output.addList().read(boxes);
         output.addList().read(worldCoords);
         controllerPort.write();
+        */
+
+        return true;
     }
 };
 

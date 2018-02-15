@@ -48,7 +48,7 @@ ret = ret and yarp.NetworkBase_connect(port_speech_recog:getName(), "/speechReco
 
 if ret == false then
     print("\n\nERROR WITH CONNECTIONS, PLEASE CHECK\n\n")
-    os.exit()
+    --os.exit()
 end
 
 ---------------------------------------
