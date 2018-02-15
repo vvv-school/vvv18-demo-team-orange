@@ -37,7 +37,7 @@ This component makes use of two YARP modules: lbpExtractor and SFM. The former a
 ### Classification (Deep Learning)
 
 ### Kinematics
-In the kinematics lecture, we programmed iCub to reach a position in the cartesian space with his hand, and this point was retrieved from the triangulation of two points retrieved from images issued from the iCub cameras. In this case, we are not interested in reach the point, but to point to it using the index finger. We found that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute some basic and complex actions. A fast test of this module starts by connecting to the module:
+In the kinematics lecture, we programmed iCub to reach a position in the cartesian space with his hand, and this point was retrieved from the triangulation of two points from images of both iCub cameras. In this case, we are not interested in reach a point, but to point to it using the index finger. We found out that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute some basic and complex actions. A fast test of this module starts by connecting to the module:
 
 - `$ yarp rpc /actionsRenderingEngine/cmd:io`
 
@@ -65,8 +65,11 @@ tmpList.addDouble(-1.0);
 tmpList.addDouble(0.0);
 tmpList.addDouble(0.0);`
 
-Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack].  
+Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack]. We chech the answer comparing vocabs: 
 
+`Bottle replyARE
+rpcPortARE.write(cmdARE,replyARE);
+replyARE.get(0).asVocab()==Vocab::encode("ack");`
 
 ### Dynamics
 As we learnt from the *Robot Dynamics* lecture, iCub mounts on the body sensors able to perceive generalized forces applied to the end effector. This has been exploited starting from the consideration that having the robot hand in *high five* or *low five* position means that our end-effector frame has the axes almost collinear with the root frame (even if the frames are somehow rotated). This means that, once we established the gestures we intend to use to confirm/reject the classification, we just need to read the force applied along the axis of interest to discriminate the two cases. For instance, in the high-five configuration the axis of interest is the *x_root*; while in the low-five configuration we'll be interested in the *z_root* component. The magnitude of the force, if higher than a certain threshold, will tell us that a contact happened; the direction of the force will tell us if it's a positive or negative ack.
