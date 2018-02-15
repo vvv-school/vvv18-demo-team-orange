@@ -186,3 +186,6 @@ First and foremost, the Orange Team thanks from the deep of its yarpserver the t
 Another deep thanks goes to **the organizers, the teachers (assistants included), the invited speakers** and everyone else that helped making this school so great,
 
 Farewell!
+
+
+![application](misc/sketch.jpg)
