@@ -49,7 +49,6 @@ protected:
     {
         bool ok = iarm->goToPoseSync(x, o);
         iarm->waitMotionDone();
-        yInfo() << "Inside function";
     }
 
     /***************************************************/
@@ -267,13 +266,14 @@ public:
         else if(cmd=="point_to"){
             Vector point;
             point.resize(3);
+            yInfo() << "inside point_to";
             //point[0] = -1.0;
             //point[1] = 0.0;
             //point[2] = 0.0;
             point[0] = command.get(1).asDouble();
             point[1] = command.get(2).asDouble();
             point[2] = command.get(3).asDouble();
-            bool ret=pointTo(point);
+            bool ret = pointTo(point);
             reply.addString(ret?"ok":"ko");
         }
         else

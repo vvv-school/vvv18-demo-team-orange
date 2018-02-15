@@ -1,0 +1,108 @@
+<application>
+<name>vvv18-orange</name>
+<module>
+       <name>lbpExtract</name>
+       <parameters></parameters>
+       <node>icub21</node>
+   </module>
+   <module>
+       <name>SFM</name>
+       <parameters>--robot icub</parameters>
+       <node>icub22</node>
+      </module>
+
+   <module>
+       <name>speechRecognizer</name>
+       <parameters></parameters>
+       <node>icub-win1</node>
+   </module>
+
+   <module>
+       <name>actionsRenderingEngine</name>
+       <parameters>--motor::block_eyes 5.0</parameters>
+       <node>icub21</node>
+   </module>
+
+
+
+        <connection>
+                <from>/orange/vision/controller:o</from>
+                <to>"/orange/vision/controller:i"</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/kinematics_face_expression:o</from>
+                <to>/icub/face/emotions/in</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/kinematics_high_five:o</from>
+                <to>/orange/kinematics_high_five:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/orange/dynamics_feedback:o</from>
+                <to>/orange/dynamics_feedback:i</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+
+
+
+
+
+
+        <connection>
+                <from>/icub/camcalib/left/out</from>
+                <to>/lbpExtract/image:i</to>
+                <protocol>fast_tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/lbpExtract/blobs:o</from>
+                <to>/orange/vision/box:i</to> 
+                <protocol>tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/icub/camcalib/left/out</from>
+                <to>/SFM/left:i</to>
+                <protocol>fast_tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/icub/camcalib/right/out</from>
+                <to>/SFM/right:i</to>
+                <protocol>fast_tcp</protocol>
+        </connection>
+
+        <connection>
+                <from>/SFM/rpc</from>
+                <to>/orange/vision/rpcclient</to>
+                <protocol>tcp</protocol>
+        </connection>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</application>

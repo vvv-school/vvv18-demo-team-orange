@@ -1,5 +1,5 @@
 add_subdirectory(manager)
 add_subdirectory(vision)
-add_subdirectory(learning)
+#add_subdirectory(learning)
 add_subdirectory(kinematics)
 add_subdirectory(dynamics)

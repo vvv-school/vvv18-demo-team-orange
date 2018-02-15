@@ -131,6 +131,7 @@ public:
         /*
         * VISION and CLASSIFICATION
         */
+/*
         // read input from vision
         yDebug() << "1";
         Bottle *output = portVision.read();
@@ -165,23 +166,26 @@ public:
             }
         }
         
-
+*/
         /*
         * POINT TO OBJECT
         */
-        /*
+        
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
-        request_ld.addString("point_to");
-        request_ld.addDouble(desired_position(0));
-        request_ld.addDouble(desired_position(1));
-        request_ld.addDouble(desired_position(2));
+        request_pt.addString("point_to");
+        request_pt.addDouble(-1.0);
+        request_pt.addDouble(0.0);
+        request_pt.addDouble(0.0);
+        //request_pt.addDouble(desired_position(0));
+        //request_pt.addDouble(desired_position(1));
+        //request_pt.addDouble(desired_position(2));
         rpcKinematicsHighFive.write(request_pt, response_pt);
         yInfo() << "point to: finished \n";
 
         
         Time::delay(2.0);
-        */
+        
 
         /*
         * HIGH FIVE
@@ -199,19 +203,17 @@ public:
         /*
         * ASK FOR FEEDBACK
         */
-        /*
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
-        */
 
         /*
         * REACT ACCORDING TO FEEDBACK
         */
         yarp::os::Bottle face_expression;
-        bool feedback = true; //response_feed.get(0).asBool();
+        bool feedback = response_feed.get(0).asBool();
         if (feedback) {
             // be happy
             yInfo() << "I am happy :)! \n";
