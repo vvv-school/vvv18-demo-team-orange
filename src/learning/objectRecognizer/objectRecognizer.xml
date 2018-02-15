@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="yarpmanifest.xsl"?>
+
+<module>
+
+   <name>objectRecognizer</name>
+   <doxygen-group>icub_module</doxygen-group>
+   <description>The module takes an input image, crops a region and predicts the label of its content by using a Caffe model.</description>
+   <version>1.0</version>
+
+   <description-long>
+
+    @subsection sec-intro Introduction
+
+    The input image is passed through a Convolutional Neural Network (CNN) model previously learned.
+
+    </description-long>
+
+    <arguments>
+
+    <param default="objectRecognizer" desc="module name"> name </param>
+
+    <param default="objectRecognizer.ini" desc="configuration file"> from </param>
+
+    <param default="/path/to/model.caffemodel" desc="Absolute path to the .caffemodel file."> caffemodel_file </param>
+
+    <param default="/path/to/deploy_imDataLayer.prototxt" desc="Absolute path to the .prototxt file."> prototxt_file </param>
+
+    <param default="prob" desc="Tag (defined in the .prototxt) of the output layer."> blob_name </param>
+    <param default="GPU" desc="[GPU|gpu|CPU|cpu] passed to Caffe initialization."> compute_mode </param>
+    <param default="0" desc="GPU device chosen by Caffe to run the computations (used if compute_mode is set to GPU|gpu)."> device_id </param>
+
+    <param default="256" desc="Width to which the image is resized in case in the .prototxt the mean pixel is provided."> resize_width </param>
+    <param default="256" desc="Height to which the image is resized in case in the .prototxt the mean pixel is provided."> resize_height </param>
+
+    <param default="/path/to/labels.txt" desc="Absolute path to the file containing the labels."> label_file </param>
+
+    </arguments>
+
+    <authors>
+        <author email="giulia.pasquale@iit.it"> Giulia Pasquale</author>
+    </authors>
+
+    <data>
+
+        <input>
+            <type>Image</type>
+            <port>/objectRecognizer/img:i</port>
+            <required>yes</required>
+            <description>Input image.</description>
+        </input>
+
+        <output>
+            <type>Image</type>
+            <port>/caffeRecognizer/view:o</port>
+            <description>Visualization of the prediction.</description>
+        </output>
+
+        <output>
+            <type>Bottle</type>
+            <port>/caffeRecognizer/scores:o</port>
+            <description>List of Bottles: each element is a pair (label score, label name).</description>
+        </output>
+
+    </data>
+
+</module>

@@ -1,0 +1,52 @@
+
+<application>
+
+    <name>Object Recognizer</name>
+
+    <!-- Modules -->
+
+    <module>
+        <name>yarpdev</name>
+        <parameters>--device opencv_grabber</parameters>
+        <node>lh</node>
+    </module>
+
+    <module>
+        <name>objectRecognizer</name>
+        <parameters>--from objectRecognizer.ini</parameters>
+        <node>lh</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /recview</parameters>
+        <node>lh</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /rechist</parameters>
+        <node>lh</node>
+    </module>
+
+    <!-- Connections -->
+
+    <connection>
+        <from>/grabber</from>
+        <to>/objectRecognizer/img:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/objectRecognizer/view:o</from>
+        <to>/recview</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/objectRecognizer/hist:o</from>
+        <to>/rechist</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+</application>
