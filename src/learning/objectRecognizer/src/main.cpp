@@ -402,7 +402,7 @@ public:
 
             // parameters
             radius = 256;
-            crop_mode = FIXED;
+            crop_mode = ROI;
             img_crop_mat = cv::Mat(radius,radius,CV_8UC3);
 
             // this port
