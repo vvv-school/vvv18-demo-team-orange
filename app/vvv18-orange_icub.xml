@@ -80,18 +80,10 @@
         </connection>
 
         <connection>
-                <from>/SFM/rpc</from>
-                <to>/orange/vision/rpcclient</to>
+                <from>/orange/vision/rpcclient</from>
+                <to>/SFM/rpc</to>
                 <protocol>tcp</protocol>
         </connection>
-
-
-
-
-
-
-
-
 
 
 

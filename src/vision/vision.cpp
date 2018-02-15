@@ -24,7 +24,7 @@ protected:
     BufferedPort<Bottle> boxPort;
 
     //SFM
-    RpcClient rpcPort;
+    Port rpcPort;
 
     //CONTROLLER
     BufferedPort<Bottle> controllerPort;
@@ -88,7 +88,7 @@ public:
         Bottle* boxBot = boxPort.read();
         yInfo() << "ei2";
 
-        /*
+        
         Matrix boxes(boxBot->size(), 4);    // Bounding boxes
         Matrix centers(boxBot->size(), 2);  // Center points of the bounding boxes
         for(int i=0; i<boxBot->size(); i++){
@@ -110,6 +110,11 @@ public:
             cmd.clear();
             reply.clear();
             cmd.addString("Root");
+            yDebug() << "request x, y";
+            yDebug() << centers[i][0];
+            yDebug() << centers[i][1];
+            yDebug() << "finish";
+
             cmd.addInt(centers[i][0]);
             cmd.addInt(centers[i][1]);
             rpcPort.write(cmd, reply);
@@ -117,15 +122,18 @@ public:
             worldCoords[i][0] = reply.get(0).asDouble();
             worldCoords[i][1] = reply.get(1).asDouble();
             worldCoords[i][2] = reply.get(2).asDouble();
+            yInfo() << worldCoords[i][0] << " " << worldCoords[i][1] << " " << worldCoords[i][2] << "\n";
         }
         
+        //yInfo() << worldCoords[0][0] << " " << worldCoords[0][1] << " " << worldCoords[0][2] << "\n";
 
         // Pass back data to controller
         Bottle& output = controllerPort.prepare();
+        output.clear();
         output.addList().read(boxes);
         output.addList().read(worldCoords);
         controllerPort.write();
-        */
+        
 
         return true;
     }
