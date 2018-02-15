@@ -128,7 +128,7 @@ public:
         yInfo() << "input: got it!";
         */
 
-        /*
+        
         // INITIAL FACE EXPRESSION
         yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
@@ -144,12 +144,11 @@ public:
         face_expression_ini.addString("hap");
         portKinematicsFaceExpression.write(face_expression_ini);
 
-        */
-        Time::delay(5.0);
+        
+        Time::delay(2.0);
 
 
         // LOOK DOWN
-        // look down to table
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
         request_ld.addString("look_at");
@@ -233,14 +232,19 @@ public:
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_pt.addString("point_to");
-        request_pt.addDouble(-1.0);
-        request_pt.addDouble(0.0);
-        request_pt.addDouble(0.0);
-        /*
-        request_pt.addDouble(desired_position(0));
-        request_pt.addDouble(desired_position(1));
-        request_pt.addDouble(desired_position(2));
-        */
+
+        bool simulate_object = false
+        if (simulate_object) {
+            request_pt.addDouble(-1.0);
+            request_pt.addDouble(0.0);
+            request_pt.addDouble(0.0);
+        }
+        else {
+            request_pt.addDouble(desired_position(0));
+            request_pt.addDouble(desired_position(1));
+            request_pt.addDouble(desired_position(2));
+        }
+
         rpcKinematicsHighFive.write(request_pt, response_pt);
         yInfo() << "point to: finished \n";
 
@@ -289,6 +293,14 @@ public:
         // end of cicle, wait before restarting...
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
+
+
+        // HOME POSITION
+        yInfo() << "home: request \n";
+        yarp::os::Bottle request_hp, response_hp;
+        request_hp.addString("home");
+        rpcKinematicsHighFive.write(request_hp, response_hp);
+        yInfo() << "home: finished \n";
         
         return true;
     }

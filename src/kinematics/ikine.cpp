@@ -207,6 +207,7 @@ public:
             reply.addString("Available commands:");
             reply.addString("- high_five");
             reply.addString("- home");
+            reply.addString("- point_to");
         }
         else if (cmd=="high_five")
         {
@@ -269,9 +270,10 @@ public:
             bool ret = pointTo(point);
             reply.addString(ret?"ok":"ko");
         }
-        else
+        else {
             // the father class already handles the "quit" command
             return RFModule::respond(command,reply);
+        }
 
         return true;
     }
