@@ -1,4 +1,0 @@
-mug 0
-sodabottle 1
-mouse 2
-wallet 3
