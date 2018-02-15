@@ -24,6 +24,10 @@
 #include <cv.h>
 #include <opencv2/opencv.hpp>
 
+
+#include <yarp/os/Log.h>
+#include <yarp/os/LogStream.h>
+
 #include <stdio.h>
 #include <cstdio>
 #include <cstdlib> // getenv
@@ -78,6 +82,8 @@ private:
 
     virtual void onRead(Bottle& roi)
     {
+        yDebug()<<"I entered onRead";
+        std::cout<< "I entered onRead" << std::endl;
 
         mutex.wait();
 
@@ -86,10 +92,15 @@ private:
         {
 
             ImageOf<PixelRgb> &img  = imgLPortIn.prepare();
+            img.resize(320,240);
 
             // convert from RGB to BGR
+            yDebug()<<"I try to convert to opencv";
             img_mat = cv::cvarrToMat((IplImage*)img.getIplImage());
+
+            yDebug()<<"I succeed to convert to opencv";
             cv::cvtColor(img_mat, img_mat, CV_RGB2BGR);
+            yDebug()<<"I succeed to change color to opencv";
 
             // extract the crop: init variables
             bool crop_found = false;
@@ -106,12 +117,14 @@ private:
             {
                 case FIXED:
                 {
+                    yDebug()<<"I got a FIXED";
                     x = floor(img_mat.cols*0.5f);
                     y = floor(img_mat.rows*0.5f);
                     crop_found = true;
                 } break;
                 case CENTROID:
                 {
+                    yDebug()<<"I got a CENTROID";
                     Bottle *centroid = port_in_centroid.read(true);
                     if (centroid!=NULL)
                     {
@@ -128,12 +141,15 @@ private:
                     //Bottle *roi = port_in_roi.read(false);
                     if (true)
                     {
+                        yDebug()<<"I got a ROI";
                         Bottle *window = roi.get(0).asList();
                         tlx = window->get(0).asInt();
                         tly = window->get(1).asInt();
                         brx = window->get(2).asInt();
                         bry = window->get(3).asInt();
                         crop_found = true;
+                        std::cout<< tlx << std::endl;
+                        std::cout<< bry << std::endl;
                     }
                 } break;
                 default:
@@ -167,6 +183,7 @@ private:
                     } break;
                     case ROI:
                     {
+                        yDebug()<<"I know I should be ROI found";
                         tlx = std::max(tlx, 0);
                         tly = std::max(tly, 0);
                         brx = std::max(brx, 0);
@@ -190,6 +207,7 @@ private:
                 if (crop_valid)
                 {
                     // crop the image
+                    yDebug()<<"I'm cropping with "<<tlx<<tly<<brx<<bry;
                     cv::Rect img_ROI = cv::Rect(cv::Point( tlx, tly ), cv::Point( brx, bry ));
                     img_crop_mat.resize(img_ROI.width, img_ROI.height);
                     img_mat(img_ROI).copyTo(img_crop_mat);
@@ -199,14 +217,17 @@ private:
                     if (!caffe_wrapper->forward(img_crop_mat, scores))
                     {
                         std::cout << "forward(): failed..." << std::endl;
+                        yError()<<"forward(): failed...";
                         mutex.post();
                         return;
                     }
+
                     if (scores.size()!=n_classes)
                     {
                         std::cout << n_classes << std::endl;
                         std::cout << scores.size() << std::endl;
                         std::cout << "number of labels differs from number of scores!" << std::endl;
+                        yError()<<"number of labels differs from number of scores!";
                         mutex.post();
                         return;
                     }
@@ -317,8 +338,10 @@ private:
         in.read(connection);
         // process data "in", prepare "out"
         //printf("Got message to reply to: %s\n", in.toString().c_str());
+        onRead(in);
         out.clear();
         out.addString("acknowledge");
+        out.addString(labels[0].c_str());
 //        out.append(in);
         ConnectionWriter *returnToSender = connection.getWriter();
         if (returnToSender!=NULL) {
@@ -554,7 +577,7 @@ public:
 
         // parameters
         int radius = rf.check("radius",Value(256)).asInt();
-        int crop_mode = rf.check("crop_mode", Value(FIXED)).asInt();
+        int crop_mode = rf.check("crop_mode", Value(ROI)).asInt();
 
         recognizer->set_radius(radius);
         recognizer->set_crop_mode(crop_mode);
@@ -741,7 +764,7 @@ int main(int argc, char *argv[])
     rf.setVerbose(true);
 
     rf.setDefaultContext("objectRecognizer");
-    rf.setDefaultConfigFile("objectRecognizer.ini");
+    rf.setDefaultConfigFile("config.ini");
 
     rf.configure(argc,argv);
 
