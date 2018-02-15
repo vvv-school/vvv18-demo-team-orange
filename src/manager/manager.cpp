@@ -95,7 +95,7 @@ public:
         // USER INPUT 
         std::string desired_object = "";
         yInfo() << "input: wating...";
-
+        /*
         yarp::os::Bottle user_input;
         std::string user_cmd; // = user_input->get(0).asString();
         if (!portSpeechInput.read(user_input)) {
@@ -126,6 +126,7 @@ public:
             return true;
         }
         yInfo() << "input: got it!";
+        */
 
         /*
         // INITIAL FACE EXPRESSION
@@ -143,7 +144,7 @@ public:
         face_expression_ini.addString("hap");
         portKinematicsFaceExpression.write(face_expression_ini);
 
-
+        */
         Time::delay(5.0);
 
 
@@ -155,7 +156,7 @@ public:
         request_ld.addDouble(-30);
         rpcKinematicsHighFive.write(request_ld, response_ld);
         yInfo() << "look_down: finished \n";
-        */
+        
 
         //VISION and CLASSIFICATION
 
@@ -164,7 +165,8 @@ public:
         Bottle *output = portVision.read();
         yInfo() << "Done!";
 
-        yarp::os::Bottle *input_boxes = output->get(0).asList()->get(2).asList();//->write(boxes);
+
+        yarp::os::Bottle *input_boxes = output->get(0).asList()->get(2).asList();
         int list_size = input_boxes->size();
         
         // TODO
@@ -178,10 +180,11 @@ public:
         //    return;
         //}
 
+        yInfo() << "Bounding boxes...";
         std::vector<std::string> list_labels(list_size);
         for (int i = 0; i < list_size / 4; i++) {
             Bottle& output = portClassifierROI.prepare();
-            Vector box;
+            Vector box(4);
             box(0) = input_boxes->get(i * 4).asInt();
             box(1) = input_boxes->get(i * 4 + 1).asInt();
             box(2) = input_boxes->get(i * 4 + 2).asInt();
@@ -189,12 +192,15 @@ public:
             output.addList().read(box);
             portClassifierROI.write();
 
+            /*
             yInfo() << "Classifier...";
             Bottle *input = portClassifierLabel.read();
             list_labels[i] = input->get(0).asString();
             yInfo() << "Done!";
+            */
         }       
 
+        yInfo() << "Comparing labels...";
         // process labels and get desired position
         yarp::os::Bottle *input_coord = output->get(1).asList()->get(2).asList();
         list_size = input_coord->size();
@@ -217,9 +223,12 @@ public:
                 //}  
             }
         }
+
+        desired_position(0) = input_coord->get(0).asDouble();
+        desired_position(1) = input_coord->get(1).asDouble();
+        desired_position(2) = input_coord->get(2).asDouble();
         
         
-        /*
         // POINT TO OBJECT
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
@@ -227,9 +236,11 @@ public:
         request_pt.addDouble(-1.0);
         request_pt.addDouble(0.0);
         request_pt.addDouble(0.0);
-        //request_pt.addDouble(desired_position(0));
-        //request_pt.addDouble(desired_position(1));
-        //request_pt.addDouble(desired_position(2));
+        /*
+        request_pt.addDouble(desired_position(0));
+        request_pt.addDouble(desired_position(1));
+        request_pt.addDouble(desired_position(2));
+        */
         rpcKinematicsHighFive.write(request_pt, response_pt);
         yInfo() << "point to: finished \n";
 
@@ -247,7 +258,7 @@ public:
 
         Time::delay(2.0);
 
-
+        
         // ASK FOR FEEDBACK
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
@@ -274,11 +285,11 @@ public:
         }
         portKinematicsFaceExpression.write(face_expression);
 
-
+        
         // end of cicle, wait before restarting...
         yInfo() << "End of cicle, wait before restarting... \n\n\n";
         Time::delay(5.0);
-        */
+        
         return true;
     }
 

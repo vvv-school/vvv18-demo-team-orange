@@ -85,18 +85,6 @@
                 <protocol>tcp</protocol>
         </connection>
 
-        <connection>
-                <from>/orange/kinematics_point_to:o</from>
-                <to>/orange/dynamics_feedback:i</to>
-                <protocol>tcp</protocol>
-        </connection>
-
-        <connection>
-                <from>/orange/dynamics_feedback:o</from>
-                <to>/actionsRenderingEngine/cmd:io</to>
-                <protocol>tcp</protocol>
-        </connection>
-
 
 
 
