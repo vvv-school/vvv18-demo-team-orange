@@ -178,15 +178,8 @@ public:
         //    return;
         //}
 
-        //yarp::sig::Matrix boxes(list_size / 4, 4);
-        //std::vector<std::string> list_labels;
         std::vector<std::string> list_labels(list_size);
         for (int i = 0; i < list_size / 4; i++) {
-            //boxes[i][0] = input_boxes->get(i * 4).asInt();
-            //boxes[i][1] = input_boxes->get(i * 4 + 1).asInt();
-            //boxes[i][2] = input_boxes->get(i * 4 + 2).asInt();
-            //boxes[i][3] = input_boxes->get(i * 4 + 3).asInt();
-
             Bottle& output = portClassifierROI.prepare();
             Vector box;
             box(0) = input_boxes->get(i * 4).asInt();
@@ -201,14 +194,10 @@ public:
             list_labels[i] = input->get(0).asString();
             yInfo() << "Done!";
         }       
-        //yDebug() << "Boxes" << boxes.rows() << " " << boxes.cols();
-        //yDebug() << boxes.toString();
-
-
-        yarp::os::Bottle *input_coord = output->get(1).asList()->get(2).asList();//->write(boxes);
-        list_size = input_coord->size();
 
         // process labels and get desired position
+        yarp::os::Bottle *input_coord = output->get(1).asList()->get(2).asList();
+        list_size = input_coord->size();
         Vector desired_position(3);
         for (unsigned n = 0; n < list_labels.size(); ++n) {
             //cout << list_labels.at( n ) << " ";
@@ -228,48 +217,6 @@ public:
                 //}  
             }
         }
-
-
-
-
-
-/*
-        yarp::sig::Matrix worldCoords(list_size / 3, 3);
-        for (int i = 0; i < list_size / 3; i++) {
-            worldCoords[i][0] = input_coord->get(i * 3).asDouble();
-            worldCoords[i][1] = input_coord->get(i * 3 + 1).asDouble();
-            worldCoords[i][2] = input_coord->get(i * 3 + 2).asDouble();
-        }  
-*/     
-        //yDebug() << "World" << worldCoords.rows() << " " << worldCoords.cols();
-        //yDebug() << worldCoords.toString();
-
- 
-        /*
-        // query content in bounding box
-        std::vector<std::string> list_labels;
-        for (int i = 0; i < boxes.rows(); i++) {
-            // send ROI to classifier
-            yInfo() << "quering to classifier";
-            Bottle& output = portClassifierROI.prepare();
-            Vector box = boxes.getRow(i);
-            output.addList().read(box);
-            portClassifierROI.write();
-
-            // get label from classifier
-            Bottle *input = portClassifierLabel.read();
-            list_labels.push_back(input->get(0).asString());
-        }
-
-        // process labels and get desired position
-        Vector desired_position;
-        for (unsigned n = 0; n < list_labels.size(); ++n) {
-            //cout << list_labels.at( n ) << " ";
-            if (desired_object == list_labels.at(n)) {
-                desired_position = worldCoords.getRow(n);
-            }
-        }
-*/
         
         
         /*
