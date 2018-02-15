@@ -23,7 +23,7 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
 # specify to install in $ICUBcontrib_DIR/bin
-#icubcontrib_set_default_prefix()
+icubcontrib_set_default_prefix()
 
 # import math symbols from standard cmath
 add_definitions(-D_USE_MATH_DEFINES)
