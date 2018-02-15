@@ -72,7 +72,7 @@ to open a yarp scope and link it to the sensor readings, in order to understand 
 
 #### Dependencies
 - [robotology/segmentation](https://github.com/robotology/segmentation)
-- [robotology/stereo-vision] (https://github.com/robotology/stereo-vision)
+- [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
 
 
