@@ -91,16 +91,21 @@ private:
         if (true) // Should be cleaned
         {
 
-            ImageOf<PixelRgb> &img  = imgLPortIn.prepare();
-            img.resize(320,240);
+            ImageOf<PixelRgb> *img  = imgLPortIn.read();
+//            img.resize(320,240);
 
             // convert from RGB to BGR
             yDebug()<<"I try to convert to opencv";
-            img_mat = cv::cvarrToMat((IplImage*)img.getIplImage());
+            img_mat = cv::cvarrToMat((IplImage*)img->getIplImage());
+
+            //cv::imshow("window_before_color",img_mat);
+            //cv::waitKey(0);
 
             yDebug()<<"I succeed to convert to opencv";
             cv::cvtColor(img_mat, img_mat, CV_RGB2BGR);
             yDebug()<<"I succeed to change color to opencv";
+            //cv::imshow("window_after_color",img_mat);
+            //cv::waitKey(0);
 
             // extract the crop: init variables
             bool crop_found = false;
@@ -161,8 +166,10 @@ private:
             }
 
             // extract the crop: validate the coordinates
+            yDebug()<<"Did I found crop?";
             if (crop_found)
             {
+                yDebug()<<"yes";
                 switch(crop_mode)
                 {
                     case FIXED:
@@ -192,8 +199,10 @@ private:
                         tly = std::min(tly, img_mat.rows);
                         brx = std::min(brx, img_mat.cols);
                         bry = std::min(bry, img_mat.rows);
-                        if (brx-tlx>20 && bry-tly>20)
+                        if (brx-tlx>20 && bry-tly>20){
                         crop_valid = true;
+                        yDebug()<<"crop valid is "<<crop_valid;
+                        }
                     } break;
                     default:
                     {
@@ -211,6 +220,10 @@ private:
                     cv::Rect img_ROI = cv::Rect(cv::Point( tlx, tly ), cv::Point( brx, bry ));
                     img_crop_mat.resize(img_ROI.width, img_ROI.height);
                     img_mat(img_ROI).copyTo(img_crop_mat);
+
+
+//                    cv::imshow("window_before_network",img_crop_mat);
+//                    cv::waitKey(0);
 
                     // extract the scores
                     std::vector<float> scores;
@@ -308,8 +321,10 @@ private:
                     }
 
                     // send out the predicted label over the cropped region
+                    yDebug()<<"I am ready to send an image";
                     if (port_out_view.getOutputCount())
                     {
+                        yDebug()<<"I got an out counter";
                         int y_text, x_text;
                         y_text = tly-10;
                         x_text = tlx;
@@ -320,7 +335,9 @@ private:
                         cv::rectangle(img_mat,cv::Point(tlx,tly),cv::Point(brx,bry),cv::Scalar(0,255,0),2);
                         cv::putText(img_mat,labels[max_idx].c_str(),cv::Point(x_text,y_text), cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0), 4);
 
-                        port_out_view.write(img);
+                        port_out_view.write(*img);
+                        cv::imshow("window_crop",img_crop_mat);
+                        cv::waitKey(0);
                     }
 
                 }
