@@ -46,6 +46,8 @@ class Manager:public RFModule
 
     yarp::os::RpcClient rpcKinematicsHighFive;
     yarp::os::RpcClient rpcDynamicsFeedback;
+    
+    //yarp::os::BufferedPort<yarp::os::Bottle> exitStatusBottle;
 
 public:
 
@@ -76,6 +78,8 @@ public:
         portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
         rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
         rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
+        
+        //exitStatusPort.open("orange/manager:o");
 
         return true;
     }
@@ -132,6 +136,17 @@ public:
 
         yarp::os::Bottle *input_boxes = output->get(0).asList()->get(2).asList();//->write(boxes);
         int list_size = input_boxes->size();
+        
+        // TODO
+        // Verifies that at least one object has been detected
+        //if(list_size < 1){
+        //    Bottle& exitStatus = exitStatusPort.prepare();
+        //    bool status = false;
+        //    output.addInt(status);
+        //    exitStatusPort.write();
+        //    yError() << "No objects detected!";
+        //    return;
+        //}
 
         //yarp::sig::Matrix boxes(list_size / 4, 4);
         //std::vector<std::string> list_labels;
@@ -171,6 +186,16 @@ public:
                 desired_position(0) = input_coord->get(n * 3).asDouble();
                 desired_position(1) = input_coord->get(n * 3 + 1).asDouble();
                 desired_position(2) = input_coord->get(n * 3 + 2).asDouble();
+                // TODO
+                // Checks that the observed position is in a reacheable place
+                //if(desired_position(0) > abs(0.7) || desired_position(1) > abs(0.7) || desired_position(3) > abs(0.7)){
+                //    Bottle& exitStatus = exitStatusPort.prepare();
+                //    bool status = false;
+                //    output.addInt(status);
+                //    exitStatusPort.write();
+                //    yError() << "One of the world coordinates was out of range";
+                //    return;
+                //}  
             }
         }
 
@@ -295,6 +320,7 @@ public:
         yInfo() << "Interrupting your module, for port cleanup";
         portKinematicsLookAt.interrupt();
         portKinematicsPointTo.interrupt();
+        //exitStatusPort.interrupt();
         return true;
     }
 
@@ -306,6 +332,7 @@ public:
         yInfo() << "Calling close function";
         portKinematicsLookAt.close();
         portKinematicsPointTo.close();
+        //exitStatusPort.close();
         return true;
     }
 };
