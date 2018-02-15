@@ -68,13 +68,13 @@ target_link_libraries(${PROJECT_NAME} ${Caffe_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-file(GLOB conf ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.ini ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.prototxt)
-file(GLOB conf ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.ini.template ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.prototxt.template)
+#file(GLOB conf ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.ini ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.prototxt)
+#file(GLOB conf ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.ini.template ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/conf/*.prototxt.template)
 
-file(GLOB scripts ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/scripts/*.xml.template ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/scripts/*.xml)
+#file(GLOB scripts ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/scripts/*.xml.template ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/app/scripts/*.xml)
 
-yarp_install(FILES ${conf} DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${PROJECT_NAME})
-yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
+#yarp_install(FILES ${conf} DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${PROJECT_NAME})
+#yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
 
 # generate ad-hoc project to perform "make uninstall"
 #icubcontrib_add_uninstall_target()
