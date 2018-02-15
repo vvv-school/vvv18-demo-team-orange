@@ -196,6 +196,7 @@ public:
 
 
             Bottle command, reply;
+            command.addList();
             command.addInt(box(0));
             command.addInt(box(1));
             command.addInt(box(2));
