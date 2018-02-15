@@ -27,6 +27,18 @@ The central role is played by a **manager application**, which is in charge of c
 
 The other modules are divided according with the topics subdivision followed during the school and provide the function implementations needed from the manager to carry out the demo. Only the Kinematics module includes also the Gaze control, in order to avoid "empty modules" (modules which just one function or few lines of code inside). This finds support also in the YARP implementation of the two interfaces, which share the same basic idea of control and implementation. Let's have a look at each module in details:
 
+### Input (Speech commands)
+The input command is given through speech. We use the speechRecognizer module of the *robotology* repository, which let us to extract keywords from voice sentences, and mapped the following vocal commands in relative keywords, sent through rpc to the manager module:
+
+|          Sentence        |   rpc command   |             Description             |
+|          ---             |        ---      |                 ---                 |
+| "return to home positoin |       home      | move the robot to the home positoin |
+|  "where is the OBJ_NAME" |    where + obj  |  look for the OBJ_NAME in the image |
+|       "see you soon"     |       quit      |           close the program"        |
+
+where OBJ_NAME = box/car/toy/mug/book.
+Once the user speaks, the sentence is "translated" in the basic rpc command, where each option triggers a certain behavior.
+
 ### Vision
 The vision module performs the image acquisition and processing needed to obtain information from the robot's cameras about the physical world with which it interacts. In particular, it is used to locate objects placed on the table in front of it and to obtain their exact position with respect to it's own body coordinates.
 
@@ -99,3 +111,9 @@ to open a yarp scope and link it to the sensor readings, in order to understand 
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
 
+## Acknowledgements
+First and foremost, the Orange Team thanks from the deep of its yarpserver the teachers **Ugo Pattacini** and **Vadim Tikhanoff** for the patience and the help of these two last days.
+
+Another deep thanks goes to **the organizers, the teachers (assistants included), the invited speakers** and everyone else that helped making this school so great,
+
+Farewell!
