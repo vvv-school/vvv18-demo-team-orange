@@ -19,7 +19,6 @@ We were asked to make iCub able to:
  - wait for an acknowledgement from the human to understand if he succeeded or not and behave consequently, showing happiness or sadness.
 
 The approach we decided to follow has been inspired by the YARP modularity, leading us to a State-Machine architecture. 
-
 ![application](misc/framework.png)
 
 The central role is played by a **manager application**, which is in charge of communicating with the modules available using a rpc protocol. The information exchanged can be both data (for instance, the 3D position of the object to point at) and triggering signals (just to make a module run). The manager is also, of course, in charge of defining the temporal sequence of actions, waiting for an ack after each single operation. The temporal sequence can be defined as follows:
@@ -38,7 +37,7 @@ This component makes use of two YARP modules: lbpExtractor and SFM. The former a
 ### Classification (Deep Learning)
 
 ### Kinematics
-In the kinematics lecture, we programmed iCub to reach a position in the cartesian space with his hand, and this point was retrieved from the triangulation of two points retrieved from images issued from the iCub cameras. In this case, we are not interested in reach the point, but to point to it using the index finger. We found that this functionality is already implemented in the Actions Rendering Engine module, a module combining multiple libraries and modules from the iCub repository that allows to execute some basic and complex actions. A fast test of this module starts by connecting to the module:
+In the kinematics lecture, we programmed iCub to reach a position in the cartesian space with his hand, and this point was retrieved from the triangulation of two points from images of both iCub cameras. In this case, we are not interested in reach a point, but to point to it using the index finger. We found out that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute some basic and complex actions. A fast test of this module starts by connecting to the module:
 
 - `$ yarp rpc /actionsRenderingEngine/cmd:io`
 
@@ -50,8 +49,34 @@ iCub will try to point to the point and then comes back to the home position, wh
 
 ![make-it-point](/misc/iCubpoint.gif)
 
+When developing the module, we have to connect to the right port using a `RpcCLient` port:
+
+`RpcClient rpcPortARE;`
+
+Then to send the command pfar, we need to use a vocab instead of a string. 
+
+`Bottle cmdARE;
+cmdARE.addVocab(Vocab::encode("pfar"));`
+
+And then we add the point coordinates usind a list:
+
+`Bottle &tmpList=cmdARE.addList();
+tmpList.addDouble(-1.0);
+tmpList.addDouble(0.0);
+tmpList.addDouble(0.0);`
+
+Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack]. We chech the answer comparing vocabs: 
+
+`Bottle replyARE
+rpcPortARE.write(cmdARE,replyARE);
+replyARE.get(0).asVocab()==Vocab::encode("ack");`
+
 ### Dynamics
 As we learnt from the *Robot Dynamics* lecture, iCub mounts on the body sensors able to perceive generalized forces applied to the end effector. This has been exploited starting from the consideration that having the robot hand in *high five* or *low five* position means that our end-effector frame has the axes almost collinear with the root frame (even if the frames are somehow rotated). This means that, once we established the gestures we intend to use to confirm/reject the classification, we just need to read the force applied along the axis of interest to discriminate the two cases. For instance, in the high-five configuration the axis of interest is the *x_root*; while in the low-five configuration we'll be interested in the *z_root* component. The magnitude of the force, if higher than a certain threshold, will tell us that a contact happened; the direction of the force will tell us if it's a positive or negative ack.
+The following scheme summirize the sensing of a High-5 from iCub: 
+
+![Tresh](/misc/DynCondi.png)
+
 To do so, it is mandatory to reset the sensor once we reach the high/low five hand configuration with the kinematic control. In this way, we will read always 0 (more or less) and a higher value only in case of contact! Useful instructions to test the module are:
 
 - `$ yarp rpc /wholeBodyDynamics/rpc:i`
@@ -66,6 +91,7 @@ to read forces and wrenches perceived by the sensor and projected to the end-eff
 
 to open a yarp scope and link it to the sensor readings, in order to understand the direction of the applied forces and to tune the threshold to detect the contact.
 
+
 ### Temporal chart
 
 ![application](misc/temporal.png)
@@ -73,6 +99,5 @@ to open a yarp scope and link it to the sensor readings, in order to understand 
 #### Dependencies
 - [robotology/segmentation](https://github.com/robotology/segmentation)
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
-
 
 
