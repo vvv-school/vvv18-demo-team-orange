@@ -35,7 +35,12 @@ class Manager:public RFModule
     double period;
 
     yarp::os::Port portKinematicsFaceExpression;
-    
+
+    yarp::os::BufferedPort<yarp::os::Bottle> portVision;
+
+    yarp::os::BufferedPort<yarp::os::Bottle> portClassifierROI;
+    yarp::os::BufferedPort<yarp::os::Bottle> portClassifierLabel;
+
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsLookAt;
     yarp::os::BufferedPort<yarp::sig::Vector> portKinematicsPointTo;
 
@@ -64,6 +69,10 @@ public:
         if (rf.check("period"))
             period = rf.find("period").asDouble();
 
+        portVision.open("/orange/vision/controller:i");
+        portClassifierROI.open("/orange/portClassifierROI:o");
+        portClassifierLabel.open("/orange/portClassifierLabel:i");
+
         portKinematicsFaceExpression.open("/orange/kinematics_face_expression:o");
         rpcKinematicsHighFive.open("/orange/kinematics_high_five:o");
         rpcDynamicsFeedback.open("/orange/dynamics_feedback:o");
@@ -76,14 +85,19 @@ public:
     */
     bool updateModule()
     {
-        // wait for user input
+        /*
+        * USER INPUT
+        */ 
+        std::string desired_object = "mug";
         yInfo() << "input: wating...";
 
 
         yInfo() << "input: got it!";
 
 
-        // initial face expression
+        /*
+        * INITIAL FACE EXPRESSION
+        */
         yInfo() << "face expression: initial \n";
         yarp::os::Bottle face_expression_ini;
 
@@ -102,6 +116,9 @@ public:
         Time::delay(2.0);
 
 
+        /*
+        * LOOK DOWN
+        */
         // look down to table
         yInfo() << "look_down: request";
         yarp::os::Bottle request_ld, response_ld;
@@ -111,42 +128,59 @@ public:
         yInfo() << "look_down: finished \n";
 
 
-        Time::delay(2.0);
-
-        // look down to table
-        yInfo() << "look_down: request";
-        request_ld.addString("look_at");
-        request_ld.addDouble(0);
-        rpcKinematicsHighFive.write(request_ld, response_ld);
-        yInfo() << "look_down: finished \n";
-
-
+        /*
+        * VISION and CLASSIFICATION
+        */
         // read input from vision
+        Bottle *output = portVision.read();
 
+        yarp::sig::Matrix boxes, worldCoords;
+        output->get(0).asList()->write(boxes);
+        output->get(1).asList()->write(worldCoords);
 
+        // query content in bounding box
+        std::vector<std::string> list_labels;
+        for (int i = 0; i < boxes.rows(); i++) {
+            // send ROI to classifier
+            Bottle& output = portClassifierROI.prepare();
+            Vector box = boxes.getRow(i);
+            output.addList().read(box);
+            portClassifierROI.write();
 
-        // send bounding boxes (or cropped images) to classifier
+            // get label from classifier
+            Bottle *input = portClassifierLabel.read();
+            list_labels.push_back(input->get(0).asString());
+        }
 
+        // process labels and get desired position
+        Vector desired_position;
+        for (unsigned n = 0; n < list_labels.size(); ++n) {
+            //cout << list_labels.at( n ) << " ";
+            if (desired_object == list_labels.at(n)) {
+                desired_position = worldCoords.getRow(n);
+            }
+        }
 
-
-        // check bounding boxes content with input
 
         /*
-        // point to
+        * POINT TO OBJECT
+        */
         yInfo() << "point to: request";
         yarp::os::Bottle request_pt, response_pt;
         request_ld.addString("point_to");
-        request_ld.addDouble(-1.0);
-        request_ld.addDouble(0.0);
-        request_ld.addDouble(0.0);
+        request_ld.addDouble(desired_position(0));
+        request_ld.addDouble(desired_position(1));
+        request_ld.addDouble(desired_position(2));
         rpcKinematicsHighFive.write(request_pt, response_pt);
         yInfo() << "point to: finished \n";
 
-
+        
         Time::delay(2.0);
 
 
-        // high-five
+        /*
+        * HIGH FIVE
+        */
         yInfo() << "high-five: request";
         yarp::os::Bottle request_hf, response_hf;
         request_hf.addString("high_five");
@@ -157,15 +191,19 @@ public:
         Time::delay(2.0);
 
 
-        // ask for feedback
+        /*
+        * ASK FOR FEEDBACK
+        */
         yInfo() << "feedback: request";
         yarp::os::Bottle request_feed, response_feed;
         request_feed.addString("Give me feedback");
         rpcDynamicsFeedback.write(request_feed, response_feed);
         yInfo() << "feedback: finished \n";
-        */
 
-        // react accordingly to feedback
+
+        /*
+        * REACT ACCORDING TO FEEDBACK
+        */
         yarp::os::Bottle face_expression;
         bool feedback = true; //response_feed.get(0).asBool();
         if (feedback) {
@@ -190,13 +228,14 @@ public:
         Time::delay(5.0);
 
         /*
-        // home position
+        * HOME POSITION
+        */
         yInfo() << "home: request \n";
         yarp::os::Bottle request_hp, response_hp;
         request_hp.addString("home");
         rpcKinematicsHighFive.write(request_hp, response_hp);
         yInfo() << "home: finished \n";
-        */
+
         return true;
     }
 

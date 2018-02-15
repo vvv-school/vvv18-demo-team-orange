@@ -23,22 +23,21 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
 # specify to install in $ICUBcontrib_DIR/bin
-icubcontrib_set_default_prefix()
+#icubcontrib_set_default_prefix()
 
 # import math symbols from standard cmath
 add_definitions(-D_USE_MATH_DEFINES)
 
 include_directories(${YARP_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${ctrlLib_INCLUDE_DIRS})
 
 #robot
-add_executable(${PROJECT_NAME}-robot ${CMAKE_SOURCE_DIR}/ikine.cpp)
-target_link_libraries(${PROJECT_NAME}-robot ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
-install(TARGETS ${PROJECT_NAME}-robot DESTINATION bin)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/ikine.cpp)
+target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 # generate ad-hoc project to perform "make uninstall"
-icubcontrib_add_uninstall_target()
+#icubcontrib_add_uninstall_target()
 
-file(GLOB scripts ${CMAKE_SOURCE_DIR}/app/*.xml)
-yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
+#file(GLOB scripts ${CMAKE_SOURCE_DIR}/app/*.xml)
+#yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_INSTALL_DIR})
