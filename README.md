@@ -79,6 +79,8 @@ This component makes use of two YARP modules: lbpExtractor and SFM. The former a
 
 The classification component uses a Caffe machine learning module trained with a subset of the standard dataset that we used during the winter school courses. The latter has been trained offline with 5 categories of objects (box, car, toy, mug, book), generating a model that is used in the online object recognition. This is performed as follows: this module receives a bounding box from the Manager, retrieves the image from the left camera of the robot and crops it accordingly, then uses the generated image as a testing example on the machine learning system. The predicted label is, subsequently, sent back in response to the Manager. The Manager will request this computation for each of the bounding boxes retrieved from the Vision module.
 
+![application](misc/classification.png)
+
 <a name="kinematics"/>
 
 ### Kinematics
