@@ -202,7 +202,7 @@ public:
             command.addInt(box(3));
             classifierRpc.write(command, reply);
 
-            list_labels[i] = reply.get(0).asString();
+            list_labels[i] = reply.get(1).asString();
         }       
 
         yInfo() << "Comparing labels...";

@@ -7,7 +7,7 @@ layer {
   transform_param {
     mirror: false
     crop_size: 227
-    mean_file: "/home/icub/final/vvv18-demo-team-orange/src/learning/app/conf/mean.binaryproto"
+    mean_file: "/home/icub/Desktop/vvv18-demo-team-orange/src/learning/objectRecognizer/app/conf/mean.binaryproto"
   }
   memory_data_param {
     batch_size: 1
