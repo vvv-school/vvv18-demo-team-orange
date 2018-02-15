@@ -23,7 +23,7 @@ The approach we decided to follow has been inspired by the YARP modularity, lead
 
 The central role is played by a **manager application**, which is in charge of communicating with the modules available using a rpc protocol. The information exchanged can be both data (for instance, the 3D position of the object to point at) and triggering signals (just to make a module run). The manager is also, of course, in charge of defining the temporal sequence of actions, waiting for an ack after each single operation. The temporal sequence can be defined as follows:
 
-//here we put obvs the single modules
+![application](misc/temporal.png)
 
 The other modules are divided according with the topics subdivision followed during the school and provide the function implementations needed from the manager to carry out the demo. Only the Kinematics module includes also the Gaze control, in order to avoid "empty modules" (modules which just one function or few lines of code inside). This finds support also in the YARP implementation of the two interfaces, which share the same basic idea of control and implementation. Let's have a look at each module in details:
 
@@ -37,15 +37,15 @@ This component makes use of two YARP modules: lbpExtractor and SFM. The former a
 ### Classification (Deep Learning)
 
 ### Kinematics
-In the kinematics lecture, we programmed iCub to reach a position in the cartesian space with his hand, and this point was retrieved from the triangulation of two points from images of both iCub cameras. In this case, we are not interested in reach a point, but to point to it using the index finger. We found out that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute some basic and complex actions. A fast test of this module starts by connecting to the module:
+In the kinematics lectur we programmed iCub to reach a position in the cartesian space with his hand. In particular, the point was retrieved from the triangulation of two points from images of both iCub cameras and the reference frame of the hand was positioned into the palm. In this case, we are not interested in reaching a point, but in pointing at it using the index finger, which represents now the new end-effector frame we want to control. We found out that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute both basic and complex actions. A fast test of this module starts by connecting it:
 
 - `$ yarp rpc /actionsRenderingEngine/cmd:io`
 
-to ask iCub to point to a far point, we use the function pfar and the coordinates of the point. This point is defined in the global frame of iCub:
+To ask iCub to point to a far point, we use the function *pfar(...)*, which takes in input the three coordinates of the point, defined in the global frame of iCub:
 
-- `>>pfar (-1.0 0.0 0.0)`
+- `$ pfar (-1.0 0.0 0.0)`
 
-iCub will try to point to the point and then comes back to the home position, when it finish, it sends an acknowledgment.
+iCub will point to the coordinates with the index and will also look to the specified point (!). Then he will come back to the home position and return an acknowledgment.
 
 ![make-it-point](/misc/iCubpoint.gif)
 
@@ -53,19 +53,19 @@ When developing the module, we have to connect to the right port using a `RpcCLi
 
 `RpcClient rpcPortARE;`
 
-Then to send the command pfar, we need to use a vocab instead of a string. 
+Then to send the command pfar, we need to use a vocab instead of a string: 
 
-`Bottle cmdARE;
-cmdARE.addVocab(Vocab::encode("pfar"));`
+`Bottle cmdARE;`
+`cmdARE.addVocab(Vocab::encode("pfar"));`
 
-And then we add the point coordinates usind a list:
+And finally we add the point coordinates usind a list:
 
 `Bottle &tmpList=cmdARE.addList();
 tmpList.addDouble(-1.0);
 tmpList.addDouble(0.0);
 tmpList.addDouble(0.0);`
 
-Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack]. We chech the answer comparing vocabs: 
+Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack] and we check the answer comparing the vocabs: 
 
 `Bottle replyARE
 rpcPortARE.write(cmdARE,replyARE);
@@ -77,7 +77,9 @@ The following scheme summirize the sensing of a High-5 from iCub:
 
 ![Tresh](/misc/DynCondi.png)
 
-To do so, it is mandatory to reset the sensor once we reach the high/low five hand configuration with the kinematic control. In this way, we will read always 0 (more or less) and a higher value only in case of contact! Useful instructions to test the module are:
+In which Fx is the projection of the vector F on the x axis.
+
+To do all of this, it is mandatory to reset the sensor once we reach the high/low five hand configuration with the kinematic control. In this way, we will read always 0 (more or less) and a higher value only in case of contact! Useful instructions to test the module are:
 
 - `$ yarp rpc /wholeBodyDynamics/rpc:i`
 
@@ -91,10 +93,6 @@ to read forces and wrenches perceived by the sensor and projected to the end-eff
 
 to open a yarp scope and link it to the sensor readings, in order to understand the direction of the applied forces and to tune the threshold to detect the contact.
 
-
-### Temporal chart
-
-![application](misc/temporal.png)
 
 #### Dependencies
 - [robotology/segmentation](https://github.com/robotology/segmentation)
