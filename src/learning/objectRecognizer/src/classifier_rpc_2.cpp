@@ -44,7 +44,7 @@ using namespace yarp::os;
 using namespace yarp::sig;
 using namespace yarp::math;
 
-class ObjectRecognizerPort: public TypedReaderCallback<Bottle>, public PortReader
+class ObjectRecognizerPort: TypedReaderCallback<Bottle>, public PortReader
 {
 private:
 
@@ -76,13 +76,13 @@ private:
     string*                labels;
     int                    n_classes;
 
-    virtual void onRead(Bottle& roi)
+    void onRead(Bottle& roi)
     {
 
         mutex.wait();
 
         // If something arrived...
-        if (true) // Should be cleaned
+        if (roi!=NULL)
         {
 
             ImageOf<PixelRgb> &img  = imgLPortIn.prepare();
@@ -125,10 +125,10 @@ private:
                 } break;
                 case ROI:
                 {
-                    //Bottle *roi = port_in_roi.read(false);
-                    if (true)
+                    Bottle *roi = port_in_roi.read(false);
+                    if (roi!=NULL)
                     {
-                        Bottle *window = roi.get(0).asList();
+                        Bottle *window = roi->get(0).asList();
                         tlx = window->get(0).asInt();
                         tly = window->get(1).asInt();
                         brx = window->get(2).asInt();
@@ -231,8 +231,8 @@ private:
                     std::cout << std::endl << std::endl;
 
                     // prepare outputs
-//                    Stamp stamp;
-//                    this->getEnvelope(stamp);
+                    Stamp stamp;
+                    this->getEnvelope(stamp);
 
                     // send out the histogram
                     if (port_out_hist.getOutputCount()>0)
@@ -311,25 +311,9 @@ private:
 
     }
 
-
-    virtual bool read(ConnectionReader& connection) {
-        Bottle in, out;
-        in.read(connection);
-        // process data "in", prepare "out"
-        //printf("Got message to reply to: %s\n", in.toString().c_str());
-        out.clear();
-        out.addString("acknowledge");
-//        out.append(in);
-        ConnectionWriter *returnToSender = connection.getWriter();
-        if (returnToSender!=NULL) {
-            out.write(*returnToSender);
-        }
-        return true;
-    }
-
 public:
 
-    ObjectRecognizerPort(ResourceFinder &rf)// : BufferedPort<Image>()
+    ObjectRecognizerPort(ResourceFinder &rf) : BufferedPort<Image>()
     {
         // Binary file (.caffemodel) containing the network's weights
         string caffemodel_file = rf.check("caffemodel_file", Value("/path/to/model.caffemodel")).asString().c_str();
@@ -468,10 +452,10 @@ public:
         {
             mutex.wait();
 
-            //BufferedPort<Image>::interrupt();
+            BufferedPort<Image>::interrupt();
 
             port_in_centroid.interrupt();
-            //port_in_roi.interrupt();
+            port_in_roi.interrupt();
 
             port_out_view.interrupt();
             port_out_scores.interrupt();
@@ -484,10 +468,10 @@ public:
         {
             mutex.wait();
 
-            //BufferedPort<Image>::resume();
+            BufferedPort<Image>::resume();
 
             port_in_centroid.resume();
-            //port_in_roi.resume();
+            port_in_roi.resume();
 
             port_out_view.resume();
             port_out_scores.resume();
@@ -500,10 +484,10 @@ public:
         {
             mutex.wait();
 
-            //BufferedPort<Image>::close();
+            BufferedPort<Image>::close();
 
             port_in_centroid.close();
-            //port_in_roi.close();
+            port_in_roi.close();
 
             port_out_view.close();
             port_out_scores.close();
@@ -525,14 +509,14 @@ protected:
     BufferedPort<Bottle>   roiPort;
     Port                   rpcPort;
     RpcServer              rpcPortHuman;
-    ObjectRecognizerPort   *recognizer;
+    ObjectRecognizerPort   recognizer;
 
 public:
 
-//    ObjectRecognizerModule()
-//    {
-//        roiPort = NULL;
-//    }
+    ObjectRecognizerModule()
+    {
+        roiPort = NULL;
+    }
 
     bool configure(ResourceFinder &rf)
     {
@@ -547,17 +531,17 @@ public:
         // input port
         //imagePort = new ObjectRecognizerPort(rf);
         //imagePort->open(("/"+name+"/img:i").c_str());
-        roiPort.useCallback(*recognizer);  // input should go to processor.onRead()
-        roiPort.setReplier(*recognizer);
-        roiPort.open(("/"+name+"/roi:i").c_str());
+        roiPort.useCallback(processor);  // input should go to processor.onRead()
+        roiPort.setReplier(processor);
+        roiPort->open(("/"+name+"/roi:i").c_str());
 
 
         // parameters
         int radius = rf.check("radius",Value(256)).asInt();
         int crop_mode = rf.check("crop_mode", Value(FIXED)).asInt();
 
-        recognizer->set_radius(radius);
-        recognizer->set_crop_mode(crop_mode);
+        imagePort->set_radius(radius);
+        imagePort->set_crop_mode(crop_mode);
 
         // rpc ports
         rpcPortHuman.open(("/"+name+"/human:io").c_str());
@@ -570,8 +554,8 @@ public:
 
     bool interruptModule()
     {
-//        if (imagePort!=NULL)
-//        imagePort->interrupt();
+        if (imagePort!=NULL)
+        imagePort->interrupt();
 
         rpcPort.interrupt();
         rpcPortHuman.interrupt();
@@ -581,11 +565,11 @@ public:
 
     bool close()
     {
-        if (true) //imagePort!=NULL
+        if (imagePort!=NULL)
         {
-            roiPort.close();
+            imagePort->close();
             //delete imagePort;
-            delete recognizer;
+            delete roiPort;
         }
 
         rpcPort.close();
@@ -642,14 +626,12 @@ public:
                         if (property == "radius")
                         {
                             int r = command.get(2).asInt();
-//                            ok = imagePort->set_radius(r);
-                            ok = recognizer->set_radius(r);
+                            ok = imagePort->set_radius(r);
                         }
                         else if (property == "crop_mode")
                         {
                             int cm = command.get(2).asVocab();
-//                            ok = imagePort->set_crop_mode(cm);
-                            ok = recognizer->set_crop_mode(cm);
+                            ok = imagePort->set_crop_mode(cm);
                         }
                         else
                         {
@@ -683,16 +665,14 @@ public:
                         if (property=="radius")
                         {
                             int r;
-//                            ok = imagePort->get_radius(r);
-                            ok = recognizer->get_radius(r);
+                            ok = imagePort->get_radius(r);
                             reply.addInt(r);
                             break;
                         }
                         if (property=="crop_mode")
                         {
                             int cm;
-//                            ok = imagePort->get_crop_mode(cm);
-                            ok = recognizer->get_crop_mode(cm);
+                            ok = imagePort->get_crop_mode(cm);
                             reply.addVocab(cm);
                             break;
                         }
