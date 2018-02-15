@@ -233,7 +233,7 @@ public:
         yarp::os::Bottle request_pt, response_pt;
         request_pt.addString("point_to");
 
-        bool simulate_object = false
+        bool simulate_object = false;
         if (simulate_object) {
             request_pt.addDouble(-1.0);
             request_pt.addDouble(0.0);

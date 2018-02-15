@@ -58,7 +58,18 @@
 
 
 
+        <connection>
+                <from>/orange/dynamics_feedback:o</from>
+                <to>/orange/dynamics_feedback:i</to>
+                <protocol>tcp</protocol>
+        </connection>
 
+        <connection>
+                
+                 <from>/orange/kinematics_point_to:o</from>
+                <to>/actionsRenderingEngine/cmd:io</to>
+                <protocol>tcp</protocol>
+        </connection>
 
 
         <connection>
@@ -69,7 +80,7 @@
 
         <connection>
                 <from>/orange/vision/controller:o</from>
-                <to>"/orange/vision/controller:i</to>
+                <to>/orange/vision/controller:i</to>
                 <protocol>tcp</protocol>
         </connection>
 
