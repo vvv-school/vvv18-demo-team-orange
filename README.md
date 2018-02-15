@@ -11,6 +11,19 @@ Ciao a tutti and welcome to the official documentation of the **VVV18 Orange Tea
 
 Let's start with a brief overview of the problem itself and then move on how we decided to tackle it.
 
+# Table of Contents  
+- [Overview](#overview)  
+- [Input (speech commands)](#input)
+- [Vision](#vision) 
+- [Classification (Deep Learning)](#classification) 
+- [Kinematics](#kinematics)
+- [Dynamics](#dynamics)
+- [Dependencies](#dependencies)
+- [Installation](#installation)
+- [Acknowledgments](#ack) 
+
+
+<a name="overview"/>
 ## Overview
 
 We were asked to make iCub able to:
@@ -29,6 +42,7 @@ The central role is played by a **Manager application**, which is in charge of c
 The other modules are divided in accordance with the subdivision of topics followed during the school and provide the functionalities needed from the Manager to perform the demo task. The only exception to this is the Kinematics module which also includes the Gaze control, in order to avoid  having modules with just one function or composed by only a few lines of code. This choice is also supported by the YARP implementation of the Cartesian and Gaze interfaces, which share the same basic idea of control and implementation.
 Let's have a look at the details of each module:
 
+<a name="overview"/>
 ### Input (Speech commands)
 The input command is given through speech. We use the speechRecognizer module of the *robotology* repository, which allows us to extract keywords from voice sentences. We map the following vocal commands in relative keywords, sent through RPC to the manager module:
 
@@ -40,14 +54,15 @@ The input command is given through speech. We use the speechRecognizer module of
 
 where OBJ_NAME can be one of the sequent:
 
--box
--car
--toy
--mug
--book
+- box
+- car
+- toy
+- mug
+- book
 
 Once the user speaks, the sentence is translated in the basic RPC command, where each option triggers a certain behavior.
 
+<a name="vision"/>
 ### Vision
 The Vision module performs the image acquisition and processing needed to obtain information from the robot's cameras about the physical world with which it interacts. In particular, it is used to locate objects placed on the table in front of it and to obtain their exact position with respect to it's own body coordinates.
 
@@ -55,8 +70,10 @@ The Vision module performs the image acquisition and processing needed to obtain
 
 This component makes use of two YARP modules: lbpExtractor and SFM. The former acquires the left robot camera and performs texture filtering and object segmentation, outputting the bounding boxes coordinates of the detected blobs. These are used by the vision module to compute, for each of them, their center point in (x,y) image coordinates. Subsequently, SFM collects both the left and right robot camera images, computes the disparity map and uses it, together with the an (x,y) image coordinate point, to compute the (x,y,z) world coordinate of the latter with reference to the robot's torso. Finally, the vision module returns to the manager the list of bounding boxes and their centers in world coordinates.
 
+<a name="classification"/>
 ### Classification (Deep Learning)
 
+<a name="kinematics"/>
 ### Kinematics
 In the Kinematics lecture we programmed iCub to reach a position in the cartesian space with its hand, in accordance to a reference frame positioned into its palm. In particular, a point in the world was obtained from the triangulation of two points in each of the robot's cameras. In this case, we are not interested in reaching a point, but in pointing at it using the index finger, which represents now the new end-effector frame we want to control. To accompilsh this, we made use of the Actions Rendering Engine (ARE), a module combining multiple libraries and modules from the iCub repository that allows the execution of both basic and complex actions. A fast test of this module starts by connecting it:
 
@@ -98,6 +115,7 @@ rpcPortARE.write(cmdARE,replyARE);
 replyARE.get(0).asVocab()==Vocab::encode("ack");
 ```
 
+<a name="dynamics"/>
 ### Dynamics
 As we learnt from the *Robot Dynamics* lecture, iCub is equipped with sensors able to perceive generalized forces applied to the end effector. This has been exploited starting from the consideration that having the robot hand in *high five* or *low five* position means that our end-effector frame has the axes almost collinear with the root frame (even if the frames are somehow rotated). This means that, once we established the gestures we intend to use to confirm/reject the classification, we just need to read the force applied along the axis of interest to discriminate the two cases. For instance, in the high-five configuration the axis of interest is the *x_root*; while in the low-five configuration we'll be interested in the *z_root* component. The magnitude of the force, if higher than a certain threshold, will tell us that a contact happened; the direction of the force will tell us if it's a positive or negative ack.
 The following scheme summirize the sensing of a High-5 from iCub: 
@@ -120,11 +138,12 @@ to read forces and wrenches perceived by the sensor and projected to the end-eff
 
 to open a yarp scope and link it to the sensor readings, in order to understand the direction of the applied forces and to tune the threshold to detect the contact.
 
-
+<a name="dependencies"/>
 ## Dependencies
 - [robotology/segmentation](https://github.com/robotology/segmentation)
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
+<a name="installation"/>
 ## Installation
 To install this demo, simply make and install as follows:
 
@@ -149,7 +168,7 @@ $ cd build
 $ cmake ..
 $ make install
 ```
-
+<a name="ack"/>
 ## Acknowledgements
 First and foremost, the Orange Team thanks from the deep of its yarpserver the teachers **Ugo Pattacini** and **Vadim Tikhanoff** for the patience and the help of these two last days.
 
