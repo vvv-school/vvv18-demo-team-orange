@@ -110,6 +110,26 @@ to open a yarp scope and link it to the sensor readings, in order to understand 
 - [robotology/segmentation](https://github.com/robotology/segmentation)
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
+## Installation
+To install this demo, simply make and install as follows:
+
+- `$ git clone https://github.com/vvv-school/vvv18-demo-team-orange.git`
+- `$ cd vvv18-demo-team-orange`
+- `$ mkdir build`
+- `$ cd build`
+- `$ cmake ..`
+- `$make install`
+
+Be sure that the LUA directory points to the path of the project.
+
+If you do not wish to install all the software but just a subset of selected modules, you can choose not to build the entire repository but just one of its components. Simply navigate to one of the subfolders of `/src/` and follow these steps:
+
+- `$ git clone https://github.com/vvv-school/vvv18-demo-team-orange.git`
+- `$ cd vvv18-demo-team-orange/src/<module_of_choice>`
+- `$ mkdir build`
+- `$ cd build`
+- `$ cmake ..`
+- `$make install`
 
 ## Acknowledgements
 First and foremost, the Orange Team thanks from the deep of its yarpserver the teachers **Ugo Pattacini** and **Vadim Tikhanoff** for the patience and the help of these two last days.
