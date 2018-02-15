@@ -51,11 +51,11 @@ This component makes use of two YARP modules: lbpExtractor and SFM. The former a
 ### Kinematics
 In the kinematics lectur we programmed iCub to reach a position in the cartesian space with his hand. In particular, the point was retrieved from the triangulation of two points from images of both iCub cameras and the reference frame of the hand was positioned into the palm. In this case, we are not interested in reaching a point, but in pointing at it using the index finger, which represents now the new end-effector frame we want to control. We found out that this functionality is already implemented in the Actions Rendering Engine (ARE) module, a module combining multiple libraries and modules from the iCub repository that allows to execute both basic and complex actions. A fast test of this module starts by connecting it:
 
-- `$ yarp rpc /actionsRenderingEngine/cmd:io`
+`$ yarp rpc /actionsRenderingEngine/cmd:io`
 
 To ask iCub to point to a far point, we use the function *pfar(...)*, which takes in input the three coordinates of the point, defined in the global frame of iCub:
 
-- `$ pfar (-1.0 0.0 0.0)`
+`$ pfar (-1.0 0.0 0.0)`
 
 iCub will point to the coordinates with the index and will also look to the specified point (!). Then he will come back to the home position and return an acknowledgment.
 
@@ -67,21 +67,27 @@ When developing the module, we have to connect to the right port using a `RpcCLi
 
 Then to send the command pfar, we need to use a vocab instead of a string: 
 
-`Bottle cmdARE;`
-`cmdARE.addVocab(Vocab::encode("pfar"));`
+```
+Bottle cmdARE;
+cmdARE.addVocab(Vocab::encode("pfar"));
+```
 
 And finally we add the point coordinates usind a list:
 
-`Bottle &tmpList=cmdARE.addList();
+```
+Bottle &tmpList=cmdARE.addList();
 tmpList.addDouble(-1.0);
 tmpList.addDouble(0.0);
-tmpList.addDouble(0.0);`
+tmpList.addDouble(0.0);
+```
 
 Once we send the bottle to the ARE module, it replies with a vocab [ack]/[nack] and we check the answer comparing the vocabs: 
 
-`Bottle replyARE
+```
+Bottle replyARE
 rpcPortARE.write(cmdARE,replyARE);
-replyARE.get(0).asVocab()==Vocab::encode("ack");`
+replyARE.get(0).asVocab()==Vocab::encode("ack");
+```
 
 ### Dynamics
 As we learnt from the *Robot Dynamics* lecture, iCub mounts on the body sensors able to perceive generalized forces applied to the end effector. This has been exploited starting from the consideration that having the robot hand in *high five* or *low five* position means that our end-effector frame has the axes almost collinear with the root frame (even if the frames are somehow rotated). This means that, once we established the gestures we intend to use to confirm/reject the classification, we just need to read the force applied along the axis of interest to discriminate the two cases. For instance, in the high-five configuration the axis of interest is the *x_root*; while in the low-five configuration we'll be interested in the *z_root* component. The magnitude of the force, if higher than a certain threshold, will tell us that a contact happened; the direction of the force will tell us if it's a positive or negative ack.
@@ -93,15 +99,15 @@ In which Fx is the projection of the vector F on the x axis.
 
 To do all of this, it is mandatory to reset the sensor once we reach the high/low five hand configuration with the kinematic control. In this way, we will read always 0 (more or less) and a higher value only in case of contact! Useful instructions to test the module are:
 
-- `$ yarp rpc /wholeBodyDynamics/rpc:i`
+`$ yarp rpc /wholeBodyDynamics/rpc:i`
 
 to reset the sensor to 0, giving this value as input to the rpc port;
 
-- `$ yarp read ... /wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o`
+`$ yarp read ... /wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o`
 
 to read forces and wrenches perceived by the sensor and projected to the end-effector;
 
-- `$ yarpscope --remote "/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o`
+`$ yarpscope --remote "/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o`
 
 to open a yarp scope and link it to the sensor readings, in order to understand the direction of the applied forces and to tune the threshold to detect the contact.
 
@@ -110,6 +116,30 @@ to open a yarp scope and link it to the sensor readings, in order to understand 
 - [robotology/segmentation](https://github.com/robotology/segmentation)
 - [robotology/stereo-vision](https://github.com/robotology/stereo-vision)
 
+## Installation
+To install this demo, simply make and install as follows:
+
+```
+$ git clone https://github.com/vvv-school/vvv18-demo-team-orange.git
+$ cd vvv18-demo-team-orange
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make install
+```
+
+Be sure that the LUA directory points to the path of the project.
+
+If you do not wish to install all the software but just a subset of selected modules, you can choose not to build the entire repository but just one of its components. Simply navigate to one of the subfolders of `/src` and follow these steps:
+
+```
+$ git clone https://github.com/vvv-school/vvv18-demo-team-orange.git
+$ cd vvv18-demo-team-orange/src/<module_of_choice>
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make install
+```
 
 ## Acknowledgements
 First and foremost, the Orange Team thanks from the deep of its yarpserver the teachers **Ugo Pattacini** and **Vadim Tikhanoff** for the patience and the help of these two last days.
