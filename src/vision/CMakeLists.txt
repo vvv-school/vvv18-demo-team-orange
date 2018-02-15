@@ -20,10 +20,10 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
 # specify to install in $ICUBcontrib_DIR/bin
-icubcontrib_set_default_prefix()
+#icubcontrib_set_default_prefix()
 
 include_directories(${YARP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-add_executable(${PROJECT_NAME} vision.cpp)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR} vision.cpp)
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
